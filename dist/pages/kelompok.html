@@ -46,10 +46,10 @@
                 <div class="sidebar-wrapper">
                     <nav class="mt-2"> <!--begin::Sidebar Menu-->
                         <ul class="nav sidebar-menu flex-column" role="menu">
-                            <li class="nav-item"> <a href="home.html" class="nav-link active"> <i class="nav-icon bi bi-circle"></i>
+                            <li class="nav-item"> <a href="home.html" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
                                     <p>Data Mahasiswa</p>
                                 </a> </li>
-                            <li class="nav-item"> <a href="kelompok.html" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                            <li class="nav-item"> <a href="kelompok.html" class="nav-link active"> <i class="nav-icon bi bi-circle"></i>
                                     <p>Data Kelompok</p>
                                 </a> </li>
                             <li class="nav-item"> <a href="dosen.html" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
@@ -67,69 +67,100 @@
             </aside> <!--end::Sidebar--> <!--begin::App Main-->
             <main class="app-main">
                 <div class="container-fluid px-5 py-3">
-                    <h1>Data Mahasiswa</h1>
-                    <p>Data Mahasiswa yang Mendaftar KP</p>
-                    <button class="btn btn-primary" type="button">Tambah Mahasiswa</button>
+                    <h1>Data Kelompok Kerja Praktek</h1>
+                    <p>Data Mahasiswa Kerja Praktek Per Kelompok</p>
                     <table class="table table-bordered mt-3">
                         <thead>
                             <tr>
-                                <th>NIM</th>
+                                <th width="12%">Kelompok</th>
                                 <th>Nama Mahasiswa</th>
                                 <th>Kelas</th>
-                                <th>Kelompok</th>
-                                <th>Aksi</th>
+                                <th>Dosen</th>
+                                <th width="25%">Judul KP</th>
+                                <th width="15%">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr class="align-middle">
-                                <td>20210810001</td>
+                                <td rowspan="5">Kelompok 1</td>
                                 <td>Mahasiswa 1</td>
                                 <td>TINFC-2021-01</td>
-                                <td>1</td>
-                                <td>
+                                <td rowspan="5">Dosen 1</td>
+                                <td rowspan="5">Judul 1</td>
+                                <td rowspan="5">
                                     <button class="btn btn-primary" type="button">Ubah</button>
                                     <button class="btn btn-danger" type="button">Hapus</button>
                                 </td>
                             </tr>
                             <tr class="align-middle">
-                                <td>20210810002</td>
                                 <td>Mahasiswa 2</td>
                                 <td>TINFC-2021-01</td>
-                                <td>1</td>
-                                <td>
-                                    <button class="btn btn-primary" type="button">Ubah</button>
-                                    <button class="btn btn-danger" type="button">Hapus</button>
-                                </td>
                             </tr>
                             <tr class="align-middle">
-                                <td>20210810003</td>
                                 <td>Mahasiswa 3</td>
                                 <td>TINFC-2021-01</td>
-                                <td>1</td>
-                                <td>
-                                    <button class="btn btn-primary" type="button">Ubah</button>
-                                    <button class="btn btn-danger" type="button">Hapus</button>
-                                </td>
                             </tr>
                             <tr class="align-middle">
-                                <td>20210810004</td>
                                 <td>Mahasiswa 4</td>
                                 <td>TINFC-2021-01</td>
-                                <td>1</td>
-                                <td>
+                            </tr>
+                            <tr class="align-middle">
+                                <td>Mahasiswa 5</td>
+                                <td>TINFC-2021-01</td>
+                            </tr>
+                            <tr class="align-middle">
+                                <td rowspan="5">Kelompok 2</td>
+                                <td>Mahasiswa 6</td>
+                                <td>TINFC-2021-02</td>
+                                <td rowspan="5">Dosen 2</td>
+                                <td rowspan="5">Judul 2</td>
+                                <td rowspan="5">
                                     <button class="btn btn-primary" type="button">Ubah</button>
                                     <button class="btn btn-danger" type="button">Hapus</button>
                                 </td>
                             </tr>
                             <tr class="align-middle">
-                                <td>20210810005</td>
-                                <td>Mahasiswa 5</td>
-                                <td>TINFC-2021-01</td>
-                                <td>2</td>
-                                <td>
+                                <td>Mahasiswa 7</td>
+                                <td>TINFC-2021-02</td>
+                            </tr>
+                            <tr class="align-middle">
+                                <td>Mahasiswa 8</td>
+                                <td>TINFC-2021-02</td>
+                            </tr>
+                            <tr class="align-middle">
+                                <td>Mahasiswa 9</td>
+                                <td>TINFC-2021-02</td>
+                            </tr>
+                            <tr class="align-middle">
+                                <td>Mahasiswa 10</td>
+                                <td>TINFC-2021-02</td>
+                            </tr>
+                            <tr class="align-middle">
+                                <td rowspan="5">Kelompok 3</td>
+                                <td>Mahasiswa 11</td>
+                                <td>TINFC-2021-03</td>
+                                <td rowspan="5">Dosen 3</td>
+                                <td rowspan="5">Judul 3</td>
+                                <td rowspan="5">
                                     <button class="btn btn-primary" type="button">Ubah</button>
                                     <button class="btn btn-danger" type="button">Hapus</button>
                                 </td>
+                            </tr>
+                            <tr class="align-middle">
+                                <td>Mahasiswa 12</td>
+                                <td>TINFC-2021-03</td>
+                            </tr>
+                            <tr class="align-middle">
+                                <td>Mahasiswa 13</td>
+                                <td>TINFC-2021-03</td>
+                            </tr>
+                            <tr class="align-middle">
+                                <td>Mahasiswa 14</td>
+                                <td>TINFC-2021-03</td>
+                            </tr>
+                            <tr class="align-middle">
+                                <td>Mahasiswa 15</td>
+                                <td>TINFC-2021-03</td>
                             </tr>
                         </tbody>
                     </table>
