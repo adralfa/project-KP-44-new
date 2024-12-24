@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="../css/adminlte.min.css" crossorigin="anonymous"/>
-    <script src="../js/adminlte.min.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="../../../css/adminlte.min.css" crossorigin="anonymous"/>
+    <script src="../../../js/adminlte.min.js" crossorigin="anonymous"></script>
 </head>
 <body>
     <body class="layout-fixed sidebar-expand-lg bg-body-tertiary"> <!--begin::App Wrapper-->
@@ -20,9 +20,9 @@
                     </ul> end::Start Navbar Links begin::End Navbar Links -->
                     <ul class="navbar-nav ms-auto"> <!--begin::Navbar Search-->
                         <!--begin::User Menu Dropdown-->
-                        <li class="nav-item dropdown user-menu"> <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"> <img src="../../dist/assets/img/user2-160x160.jpg" class="user-image rounded-circle shadow" alt="User Image"> <span class="d-none d-md-inline">Alexander Pierce</span> </a>
+                        <li class="nav-item dropdown user-menu"> <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"> <img src="/dist/assets/img/user2-160x160.jpg" class="user-image rounded-circle shadow" alt="User Image"> <span class="d-none d-md-inline">Alexander Pierce</span> </a>
                             <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end"> <!--begin::User Image-->
-                                <li class="user-header text-bg-primary"> <img src="../../dist/assets/img/user2-160x160.jpg" class="rounded-circle shadow" alt="User Image">
+                                <li class="user-header text-bg-primary"> <img src="/dist/assets/img/user2-160x160.jpg" class="rounded-circle shadow" alt="User Image">
                                     <p>
                                         Alexander Pierce - Web Developer
                                         <small>Member since Nov. 2023</small>
@@ -42,10 +42,13 @@
                 </div> <!--end::Container-->
             </nav> <!--end::Header--> <!--begin::Sidebar-->
             <aside class="app-sidebar bg-primary shadow" data-bs-theme="dark"> <!--begin::Sidebar Brand-->
-                <div class="sidebar-brand bg-light"> <!--begin::Brand Link--> <a href="./home.html" class="brand-link"> <!--begin::Brand Image--> <img src="../../dist/assets/img/LOGOFKOM.png" alt="AdminLTE Logo" class="brand-image opacity-75 shadow"> <!--end::Brand Image--> <!--begin::Brand Text-->  </a> <!--end::Brand Link--> </div> <!--end::Sidebar Brand--> <!--begin::Sidebar Wrapper-->
+                <div class="sidebar-brand bg-light"> <!--begin::Brand Link--> <a href="./home.html" class="brand-link"> <!--begin::Brand Image--> <img src="/dist/assets/img/LOGOFKOM.png" alt="AdminLTE Logo" class="brand-image opacity-75 shadow"> <!--end::Brand Image--> <!--begin::Brand Text-->  </a> <!--end::Brand Link--> </div> <!--end::Sidebar Brand--> <!--begin::Sidebar Wrapper-->
                 <div class="sidebar-wrapper">
                     <nav class="mt-2"> <!--begin::Sidebar Menu-->
                         <ul class="nav sidebar-menu flex-column" role="menu">
+                            <li class="nav-item"> <a href="infokp.html" class="nav-link active"> <i class="nav-icon bi bi-circle"></i>
+                                <p>Informasi KP</p>
+                            </a> </li>
                             <li class="nav-item"> <a href="home.html" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
                                     <p>Data Mahasiswa</p>
                                 </a> </li>
@@ -58,7 +61,7 @@
                             <li class="nav-item"> <a href="mitra.html" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
                                     <p>Data Mitra</p>
                                 </a> </li>
-                                <li class="nav-item"> <a href="staff.html" class="nav-link active"> <i class="nav-icon bi bi-circle"></i>
+                                <li class="nav-item"> <a href="staff.html" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
                                     <p>Data Staff</p>
                                 </a> </li>
                         </ul>
@@ -67,46 +70,43 @@
             </aside> <!--end::Sidebar--> <!--begin::App Main-->
             <main class="app-main">
                 <div class="container-fluid px-5 py-3">
-                    <h1>Data Staff</h1>
-                    <p>Data Staff yang terlibat dalam Kerja Praktek</p>
-                    <button class="btn btn-primary" type="button">Tambah Staff</button>
-                    <table class="table table-bordered mt-3">
-                        <thead>
-                            <tr>
-                                <th>NIK</th>
-                                <th>Nama Staff</th>
-                                <th>Jabatan</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="align-middle">
-                                <td>1234567891</td>
-                                <td>Staff 1</td>
-                                <td>Staff Keuangan</td>
-                                <td>
-                                    <button class="btn btn-primary" type="button">Ubah</button>
-                                    <button class="btn btn-danger" type="button">Hapus</button>
-                                </td>
-                            </tr>
-                            <tr class="align-middle">
-                                <td>1234567891</td>
-                                <td>Staff 2</td>
-                                <td>Staff Umum</td>
-                                <td>
-                                    <button class="btn btn-primary" type="button">Ubah</button>
-                                    <button class="btn btn-danger" type="button">Hapus</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <ul class="pagination pagination-sm m-0 float-end">
-                        <li class="page-item"> <a class="page-link" href="#">«</a> </li>
-                        <li class="page-item"> <a class="page-link" href="#">1</a> </li>
-                        <li class="page-item"> <a class="page-link" href="#">2</a> </li>
-                        <li class="page-item"> <a class="page-link" href="#">3</a> </li>
-                        <li class="page-item"> <a class="page-link" href="#">»</a> </li>
-                    </ul>
+                    <h1>KERJA PRAKTEK</h1>
+                    <h3>Fakultas Ilmu Komputer 2024</h3>
+
+                    <hr>
+
+                    <div class="row mt-3">
+                        <h5 class="mb-3">Kerja Praktik Fakultas Ilmu Komputer Universitas Kuningan Tahun Akademik 2024/2025</h5>
+                        <p class="mb-3">Kerja Praktek (KP) adalah salah satu mata kuliah wajib dan salah satu syarat sebelum melaksanakan penyusunan tugas akhir/skripsi. Kerja Praktek di Fakultas Ilmu Komputer mempunyai bobot 2 SKS dan dilaksanakan dengan melakukan proyek penelitian pada DU/DI (Dunia Usaha/Dunia Industri) yang berbadan hukum (memiliki ijin usaha minimal CV) atau UMKM yang telah memiliki ijin usaha, dengan dibimbing oleh 1 (satu) orang Pembimbing Lapangan yang ditunjuk oleh tempat KP (DU/DI) dan 1 (satu) orang Dosen Pembimbing yang di SK-kan oleh Dekan atas usulan Ketua Program Studi, dimana pembimbing tersebut memberikan bimbingan kepada mahasiswa selama kegiatan dan memberikan nilai akhir. Hasil dari KP berupa produk perangkat lunak (aplikasi ataupun sistem informasi) maupun produk desain komunikasi visual yang nantinya dapat digunakan untuk memecahkan permasalahan pada DU/DI dalam bentuk project-team based. Serta harus disusun menjadi sebuah Laporan Kerja Praktek dan diseminarkan di hadapan penguji KP yang ditunjuk dan di SK-kan oleh Dekan. <br><br>    
+
+                        Nilai tambah dari kegiatan praktek ini bagi peserta diantaranya adalah mampu membentuk sikap mental/attitude dalam bekerja; Mampu mengidentifikasi, menganalisa dan merumuskan masalah selama berada di dunia kerja yang berdasarkan rasional tertentu yang dinilai penting dan bermanfaat ditinjau dari berbagai faktor; Mampu menganalisa, merancang dan mengembangkan sebuah perangkat lunak terapan maupun sistem informasi; Mampu melakukan tahapan metodologis dalam pembuatan produk dan karya desain komunikasi visual; Mampu mempresentasikan hasil Kerja Praktek ke dalam sebuah laporan yang tersusun secara sistematis sesuai dengan masalah yang diteliti serta mempertanggung jawabkannya.</p>
+                    </div>
+
+                    <hr>
+
+                    <div class="row mt-3">
+                        <label for="formFile" class="form-label fw-bold">Upload Jadwal Kerja Praktik</label>
+                        <div class="col-9">
+                            <input class="form-control" type="file" id="formFile">
+                        </div>
+                        <div class="col-3">
+                            <button type="button" name="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                        <p>Ini nanti dipakai untuk menampilkan gambar jadwal KP</p>
+                    </div>
+
+                    <hr>
+
+                    <div class="row mt-3">
+                        <label for="formFile" class="form-label fw-bold">Upload Pedoman Kerja Praktik</label>
+                        <div class="col-9">
+                            <input class="form-control" type="file" id="formFile">
+                        </div>
+                        <div class="col-3">
+                            <button type="button" name="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                        <p>Ini nanti dipakai untuk menampilkan file</p>
+                    </div>
                 </div>
             </main>
             <footer class="app-footer"> <!--begin::To the end-->
