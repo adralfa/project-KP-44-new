@@ -1,3 +1,15 @@
+<?php
+session_start();
+if (isset($_SESSION['success'])) {
+    echo "<div class='alert alert-success' role='alert'>{$_SESSION['success']}</div>";
+    unset($_SESSION['success']); // Hapus pesan setelah ditampilkan
+}
+if (isset($_SESSION['error'])) {
+    echo "<div class='alert alert-danger' role='alert'>{$_SESSION['error']}</div>";
+    unset($_SESSION['error']); // Hapus pesan setelah ditampilkan
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en"> <!--begin::Head-->
 
@@ -21,32 +33,46 @@
     </div>
     <div class="login-box">
         <div class="card card-outline card-primary">
-            <div class="card-header"> <a href="home.html" class="link-dark text-center link-offset-2 link-opacity-100 link-opacity-50-hover text-decoration-none">
+            <div class="card-header"> <!--<a href="home.html" class="link-dark text-center link-offset-2 link-opacity-100 link-opacity-50-hover text-decoration-none">-->
                     <h1 class="mb-0"> <b>LOGIN</b>
                     </h1>
                 </a> </div>
             <div class="card-body login-card-body">
                 <p class="login-box-msg">Sign in to start your session</p>
-                <form class="mb-3" action="home.html" method="post">
-                    <div class="input-group mb-1">
-                        <div class="form-floating"> <input id="loginEmail" type="email" class="form-control" value="" placeholder=""> <label for="loginEmail">Email</label> </div>
-                        <div class="input-group-text"> <span class="bi bi-envelope"></span> </div>
-                    </div>
-                    <div class="input-group mb-1">
-                        <div class="form-floating"> <input id="loginPassword" type="password" class="form-control" placeholder=""> <label for="loginPassword">Password</label> </div>
-                        <div class="input-group-text"> <span class="bi bi-lock-fill"></span> </div>
-                    </div> <!--begin::Row-->
-                    <div class="row">
-                        <div class="col-8 d-inline-flex align-items-center">
-                            <div class="form-check"> <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault"> <label class="form-check-label" for="flexCheckDefault">
-                                    Remember Me
-                                </label> </div>
-                        </div> <!-- /.col -->
-                        <div class="col-4">
-                            <div class="d-grid gap-2"> <button type="submit" class="btn btn-primary">Sign In</button> </div>
-                        </div> <!-- /.col -->
-                    </div> <!--end::Row-->
-                </form>
+                <form class="mb-3" action="login.php" method="post">
+    <div class="input-group mb-1">
+        <div class="form-floating">
+            <input id="loginEmail" name="email" type="email" class="form-control" placeholder="Email" required>
+            <label for="loginEmail">Email</label>
+        </div>
+        <div class="input-group-text">
+            <span class="bi bi-envelope"></span>
+        </div>
+    </div>
+    <div class="input-group mb-1">
+        <div class="form-floating">
+            <input id="loginPassword" name="password" type="password" class="form-control" placeholder="Password" required>
+            <label for="loginPassword">Password</label>
+        </div>
+        <div class="input-group-text">
+            <span class="bi bi-lock-fill"></span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-8 d-inline-flex align-items-center">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+                <label class="form-check-label" for="flexCheckDefault">Remember Me</label>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary">Sign In</button>
+            </div>
+        </div>
+    </div>
+</form>
+
                 <p class="mb-1"> <a href="forgot-password.html">I forgot my password</a> </p>
                 <p class="mb-0"> <a href="register.html" class="text-center">
                         Register a new membership

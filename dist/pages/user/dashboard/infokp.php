@@ -1,3 +1,16 @@
+<?php
+// Direktori tempat file disimpan
+$uploadDir = "../../../assets/uploads/";
+
+// Nama file default
+$imageFile = $uploadDir . "jadwal_kp.jpg";
+$pdfFile = $uploadDir . "pedoman_kp.pdf";
+
+// Cek keberadaan file
+$imageExists = file_exists($imageFile);
+$pdfExists = file_exists($pdfFile);
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,11 +21,11 @@
     <script src="../../../js/adminlte.min.js" crossorigin="anonymous"></script>
 </head>
 <body>
-    <body class="layout-fixed sidebar-expand-lg bg-body-tertiary"> <!--begin::App Wrapper-->
+    <body class="layout-fixed sidebar-expand-lg"> <!--begin::App Wrapper-->
         <div class="app-wrapper"> <!--begin::Header-->
             <nav class="app-header navbar navbar-expand bg-body"> <!--begin::Container-->
                 <div class="container-fluid"> <!--begin::Start Navbar Links-->
-                    <h5 class="brand-text text-dark ms-2 align-middle">PENGELOLAAN DATA KERJA PRAKTEK</h5> <!--end::Brand Text-->
+                    <h5 class="brand-text text-dark ms-2 align-middle">KERJA PRAKTEK FAKULTAS ILMU KOMPUTER</h5> <!--end::Brand Text-->
                     <!-- <ul class="navbar-nav">
                         <li class="nav-item"> <a class="nav-link" data-lte-toggle="sidebar" href="#" role="button"> <i class="bi bi-list"></i> </a> </li>
                         <li class="nav-item d-none d-md-block"> <a href="#" class="nav-link">Home</a> </li>
@@ -46,23 +59,17 @@
                 <div class="sidebar-wrapper">
                     <nav class="mt-2"> <!--begin::Sidebar Menu-->
                         <ul class="nav sidebar-menu flex-column" role="menu">
-                            <li class="nav-item"> <a href="infokp.html" class="nav-link active"> <i class="nav-icon bi bi-circle"></i>
+                            <li class="nav-item"> <a href="infokp.php" class="nav-link active"> <i class="nav-icon bi bi-circle"></i>
                                 <p>Informasi KP</p>
                             </a> </li>
-                            <li class="nav-item"> <a href="home.html" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
-                                    <p>Data Mahasiswa</p>
+                            <li class="nav-item"> <a href="infomhs.html" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                                    <p>Info Mahasiswa</p>
                                 </a> </li>
-                            <li class="nav-item"> <a href="kelompok.html" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
-                                    <p>Data Kelompok</p>
+                            <li class="nav-item"> <a href="infokelompok.html" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                                    <p>Info Kelompok</p>
                                 </a> </li>
-                            <li class="nav-item"> <a href="dosen.html" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
-                                    <p>Data Dosen</p>
-                                </a> </li>
-                            <li class="nav-item"> <a href="mitra.html" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
-                                    <p>Data Mitra</p>
-                                </a> </li>
-                            <li class="nav-item"> <a href="staff.html" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
-                                    <p>Data Staff</p>
+                            <li class="nav-item"> <a href="suratkemitra.html" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                                    <p>Surat ke Mitra</p>
                                 </a> </li>
                             <li class="nav-item"> <a href="logout.html" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
                                     <p>Logout</p>
@@ -84,33 +91,36 @@
                     </div>
 
                     <div class="row mt-3 px-5 py-3">
-                        <h5 class="mb-3">Kerja Praktik Fakultas Ilmu Komputer Universitas Kuningan Tahun Akademik 2024/2025</h5>
+                        <div class="col-lg-8">
+                            <h5 class="mb-3 fw-bold">Kerja Praktik Fakultas Ilmu Komputer Universitas Kuningan Tahun Akademik 2024/2025</h5>
                         <p class="mb-3">Kerja Praktek (KP) adalah salah satu mata kuliah wajib dan salah satu syarat sebelum melaksanakan penyusunan tugas akhir/skripsi. Kerja Praktek di Fakultas Ilmu Komputer mempunyai bobot 2 SKS dan dilaksanakan dengan melakukan proyek penelitian pada DU/DI (Dunia Usaha/Dunia Industri) yang berbadan hukum (memiliki ijin usaha minimal CV) atau UMKM yang telah memiliki ijin usaha, dengan dibimbing oleh 1 (satu) orang Pembimbing Lapangan yang ditunjuk oleh tempat KP (DU/DI) dan 1 (satu) orang Dosen Pembimbing yang di SK-kan oleh Dekan atas usulan Ketua Program Studi, dimana pembimbing tersebut memberikan bimbingan kepada mahasiswa selama kegiatan dan memberikan nilai akhir. Hasil dari KP berupa produk perangkat lunak (aplikasi ataupun sistem informasi) maupun produk desain komunikasi visual yang nantinya dapat digunakan untuk memecahkan permasalahan pada DU/DI dalam bentuk project-team based. Serta harus disusun menjadi sebuah Laporan Kerja Praktek dan diseminarkan di hadapan penguji KP yang ditunjuk dan di SK-kan oleh Dekan. <br><br>    
 
                         Nilai tambah dari kegiatan praktek ini bagi peserta diantaranya adalah mampu membentuk sikap mental/attitude dalam bekerja; Mampu mengidentifikasi, menganalisa dan merumuskan masalah selama berada di dunia kerja yang berdasarkan rasional tertentu yang dinilai penting dan bermanfaat ditinjau dari berbagai faktor; Mampu menganalisa, merancang dan mengembangkan sebuah perangkat lunak terapan maupun sistem informasi; Mampu melakukan tahapan metodologis dalam pembuatan produk dan karya desain komunikasi visual; Mampu mempresentasikan hasil Kerja Praktek ke dalam sebuah laporan yang tersusun secara sistematis sesuai dengan masalah yang diteliti serta mempertanggung jawabkannya.</p>
+                        </div>
+                        <div class="col-lg-4">
+                            <p class="text-center fw-bold">Informasi Jadwal Pelaksanaan Kerja Praktek</p>
+                            <div class="d-flex justify-content-center">
+                                <!-- <img src="/dist/assets/img/Jadwal KP.jpg" alt="jadwal" style="width: 100%;"> -->
+                                <?php if ($imageExists): ?>
+    <img src="<?php echo $imageFile . '?v=' . time(); ?>" alt="Jadwal KP" class="img-fluid shadow-sm" style="width: 100%;">
+<?php else: ?>
+    <p class="text-danger">File gambar jadwal belum diunggah.</p>
+<?php endif; ?>
+
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- <hr> -->
+                    <hr>
 
-                    <div class="row px-5 py-3">
-                        <label for="formFile" class="form-label fw-bold">Upload Jadwal Kerja Praktik</label>
-                        <div class="col-9">
-                            <input class="form-control" type="file" id="formFile">
-                        </div>
-                        <div class="col-3">
-                            <button type="button" name="submit" class="btn btn-primary">Submit</button>
-                        </div>
-                    </div>
-
-                    <!-- <hr> -->
-
-                    <div class="row px-5 py-3  ">
-                        <label for="formFile" class="form-label fw-bold">Upload Pedoman Kerja Praktik</label>
-                        <div class="col-9">
-                            <input class="form-control" type="file" id="formFile">
-                        </div>
-                        <div class="col-3">
-                            <button type="button" name="submit" class="btn btn-primary">Submit</button>
+                    <div class="row mt-3 px-5 py-3">
+                        <div class="d-flex justify-content-center">
+                            <!-- <embed type="application/pdf" src="/dist/assets/pdf/Pedoman-KP-2023-2024-fix-3.pdf" width="80%" height="600"></embed> -->
+                            <?php if ($pdfExists): ?>
+                    <embed type="application/pdf" src="<?php echo $pdfFile. '?v=' . time(); ?>" width="100%" height="600"></embed>
+                <?php else: ?>
+                    <p class="text-danger">File pedoman belum diunggah.</p>
+                <?php endif; ?>
                         </div>
                     </div>
                 </div>

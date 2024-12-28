@@ -1,3 +1,11 @@
+<?php
+session_start();
+if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] != 'admin') {
+    header("Location: ../../index.php");
+    exit;
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -46,25 +54,25 @@
                 <div class="sidebar-wrapper">
                     <nav class="mt-2"> <!--begin::Sidebar Menu-->
                         <ul class="nav sidebar-menu flex-column" role="menu">
-                            <li class="nav-item"> <a href="infokp.html" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                            <li class="nav-item"> <a href="infokp.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
                                 <p>Informasi KP</p>
                             </a> </li>
-                            <li class="nav-item"> <a href="home.html" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                            <li class="nav-item"> <a href="mahasiswa.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
                                     <p>Data Mahasiswa</p>
                                 </a> </li>
-                            <li class="nav-item"> <a href="kelompok.html" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                            <li class="nav-item"> <a href="kelompok.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
                                     <p>Data Kelompok</p>
                                 </a> </li>
-                            <li class="nav-item"> <a href="dosen.html active" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                            <li class="nav-item"> <a href="dosen.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
                                     <p>Data Dosen</p>
                                 </a> </li>
-                            <li class="nav-item"> <a href="mitra.html" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                            <li class="nav-item"> <a href="mitra.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
                                     <p>Data Mitra</p>
                                 </a> </li>
-                            <li class="nav-item"> <a href="staff.html" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                            <!-- <li class="nav-item"> <a href="staff.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
                                     <p>Data Staff</p>
-                                </a> </li>
-                            <li class="nav-item"> <a href="logout.html" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                                </a> </li> -->
+                            <li class="nav-item"> <a href="../../logout.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
                                     <p>Logout</p>
                                 </a> </li>
                         </ul>
@@ -73,59 +81,32 @@
             </aside> <!--end::Sidebar--> <!--begin::App Main-->
             <main class="app-main">
                 <div class="container-fluid px-5 py-3">
-                    <h1>Data Dosen Pembimbing Lapangan</h1>
-                    <p>Data Dosen Pembimbing Lapangan Kerja Praktek</p>
-                    <button class="btn btn-primary" type="button">Tambah Dosen</button>
+                    <h1>Data Staff</h1>
+                    <p>Data Staff yang terlibat dalam Kerja Praktek</p>
+                    <button class="btn btn-primary" type="button">Tambah Staff</button>
                     <table class="table table-bordered mt-3">
                         <thead>
                             <tr>
                                 <th>NIK</th>
-                                <th>Nama Dosen</th>
-                                <th>Kelompok</th>
+                                <th>Nama Staff</th>
+                                <th>Jabatan</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr class="align-middle">
-                                <td>1234567890</td>
-                                <td>Dosen 1</td>
-                                <td>1, 2, 3</td>
+                                <td>1234567891</td>
+                                <td>Staff 1</td>
+                                <td>Staff Keuangan</td>
                                 <td>
                                     <button class="btn btn-primary" type="button">Ubah</button>
                                     <button class="btn btn-danger" type="button">Hapus</button>
                                 </td>
                             </tr>
                             <tr class="align-middle">
-                                <td>1234567890</td>
-                                <td>Dosen 1</td>
-                                <td>1, 2, 3</td>
-                                <td>
-                                    <button class="btn btn-primary" type="button">Ubah</button>
-                                    <button class="btn btn-danger" type="button">Hapus</button>
-                                </td>
-                            </tr>
-                            <tr class="align-middle">
-                                <td>1234567890</td>
-                                <td>Dosen 1</td>
-                                <td>1, 2, 3</td>
-                                <td>
-                                    <button class="btn btn-primary" type="button">Ubah</button>
-                                    <button class="btn btn-danger" type="button">Hapus</button>
-                                </td>
-                            </tr>
-                            <tr class="align-middle">
-                                <td>1234567890</td>
-                                <td>Dosen 1</td>
-                                <td>1, 2, 3</td>
-                                <td>
-                                    <button class="btn btn-primary" type="button">Ubah</button>
-                                    <button class="btn btn-danger" type="button">Hapus</button>
-                                </td>
-                            </tr>
-                            <tr class="align-middle">
-                                <td>1234567890</td>
-                                <td>Dosen 1</td>
-                                <td>1, 2, 3</td>
+                                <td>1234567891</td>
+                                <td>Staff 2</td>
+                                <td>Staff Umum</td>
                                 <td>
                                     <button class="btn btn-primary" type="button">Ubah</button>
                                     <button class="btn btn-danger" type="button">Hapus</button>

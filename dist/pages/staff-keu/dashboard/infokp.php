@@ -1,3 +1,11 @@
+<?php
+session_start();
+if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] != 'staff_keu') {
+    header("Location: ../../index.php");
+    exit;
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -46,13 +54,13 @@
                 <div class="sidebar-wrapper">
                     <nav class="mt-2"> <!--begin::Sidebar Menu-->
                         <ul class="nav sidebar-menu flex-column" role="menu">
-                            <li class="nav-item"> <a href="infokp.html" class="nav-link active"> <i class="nav-icon bi bi-circle"></i>
+                            <li class="nav-item"> <a href="infokp.php" class="nav-link active"> <i class="nav-icon bi bi-circle"></i>
                                 <p>Informasi KP</p>
                             </a> </li>
                             <li class="nav-item"> <a href="validasi.html" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
                                     <p>Data Validasi KP</p>
                                 </a> </li>
-                            <li class="nav-item"> <a href="logout.html" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                            <li class="nav-item"> <a href="../../logout.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
                                     <p>Logout</p>
                                 </a> </li>
                         </ul>
