@@ -4,6 +4,15 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] != 'staff_keu') {
     header("Location: ../../index.php");
     exit;
 }
+
+// Direktori tempat file disimpan
+$uploadDir = "../../../assets/uploads/";
+
+// Nama file default
+$imageFile = $uploadDir . "jadwal_kp.jpg";
+
+// Cek keberadaan file
+$imageExists = file_exists($imageFile);
 ?>
 
 <!DOCTYPE html>
@@ -54,10 +63,10 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] != 'staff_keu') {
                 <div class="sidebar-wrapper">
                     <nav class="mt-2"> <!--begin::Sidebar Menu-->
                         <ul class="nav sidebar-menu flex-column" role="menu">
-                            <li class="nav-item"> <a href="infokp.php" class="nav-link active"> <i class="nav-icon bi bi-circle"></i>
+                            <li class="nav-item"> <a href="infokp.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
                                 <p>Informasi KP</p>
                             </a> </li>
-                            <li class="nav-item"> <a href="validasi.html" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                            <li class="nav-item"> <a href="validasi.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
                                     <p>Data Validasi KP</p>
                                 </a> </li>
                             <li class="nav-item"> <a href="../../logout.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
@@ -89,7 +98,11 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] != 'staff_keu') {
                         <div class="col-lg-4">
                             <p class="text-center fw-bold">Informasi Jadwal Pelaksanaan Kerja Praktek</p>
                             <div class="d-flex justify-content-center">
-                                <img src="/dist/assets/img/Jadwal KP.jpg" alt="jadwal" style="width: 100%;">
+                            <?php if ($imageExists): ?>
+    <img src="<?php echo $imageFile . '?v=' . time(); ?>" alt="Jadwal KP" class="img-fluid shadow-sm" style="width: 100%;">
+<?php else: ?>
+    <p class="text-danger">File gambar jadwal belum diunggah.</p>
+<?php endif; ?>
                             </div>
                         </div>
                     </div>

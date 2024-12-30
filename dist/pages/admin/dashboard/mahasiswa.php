@@ -14,6 +14,22 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] != 'admin') {
 // Konfigurasi koneksi database
 include '../../koneksi.php';
 
+// Variabel pencarian
+$nimSearch = "";
+if (isset($_GET['nim'])) {
+    $nimSearch = $_GET['nim'];
+}
+
+// Query untuk mengambil data berdasarkan pencarian NIM (jika ada)
+$sql = "SELECT * FROM mahasiswa WHERE nim LIKE ?";
+
+// Menyiapkan query dan menghindari SQL Injection
+$stmt = $conn->prepare($sql);
+$searchTerm = "%$nimSearch%";
+$stmt->bind_param("s", $searchTerm);
+$stmt->execute();
+$result = $stmt->get_result();
+
 // Pagination konfigurasi
 $limit = 8; // Jumlah data per halaman
 $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
@@ -29,16 +45,25 @@ $sql = "
     FROM mahasiswa m
     LEFT JOIN kpconnection kc ON m.nim = kc.nim
     LEFT JOIN kelompok k ON kc.no_kelompok = k.no_kelompok
-    LIMIT $limit OFFSET $offset";
-$result = $conn->query($sql);
+    WHERE m.nim LIKE ?
+    LIMIT ? OFFSET ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("sii", $searchTerm, $limit, $offset);
+$stmt->execute();
+$result = $stmt->get_result();
+
 
 // Menghitung total data
 $total_sql = "
     SELECT COUNT(DISTINCT m.nim) AS total 
     FROM mahasiswa m
     LEFT JOIN kpconnection kc ON m.nim = kc.nim
-    LEFT JOIN kelompok k ON kc.no_kelompok = k.no_kelompok";
-$total_result = $conn->query($total_sql);
+    LEFT JOIN kelompok k ON kc.no_kelompok = k.no_kelompok
+    WHERE m.nim LIKE ?";
+$total_stmt = $conn->prepare($total_sql);
+$total_stmt->bind_param("s", $searchTerm);
+$total_stmt->execute();
+$total_result = $total_stmt->get_result();
 $total_row = $total_result->fetch_assoc();
 $total_data = $total_row['total'];
 $total_pages = ceil($total_data / $limit);
@@ -124,7 +149,36 @@ $total_pages = ceil($total_data / $limit);
         <div class="container-fluid px-5 py-3">
             <h1>Data Mahasiswa</h1>
             <p>Data Mahasiswa yang Mendaftar KP</p>
-            <button class="btn btn-primary" type="button">Tambah Mahasiswa</button>
+            <div class="row">
+                <div class="col-6 d-flex align-items-center justify-content-end">
+                    <p>Cari NIM : </p>
+                </div>
+                <div class="col-4">
+                    <form method="get" action="">
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" name="nim" value="<?php echo htmlspecialchars($nimSearch); ?>" placeholder="Cari..." aria-label="Cari NIM">
+                            <div class="input-group-append">
+                                <button class="btn btn-primary" type="submit" id="button-addon2">Cari</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-2">
+                    <button class="btn btn-primary" type="button">Tambah Mahasiswa</button>
+                </div>
+            <!-- <div class="col-7 text-end">
+                            <p>Cari NIM : </p>
+                        </div>
+                        <div class="col-5">
+    <form method="get" action="">
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" name="nim" value="<?php echo htmlspecialchars($nimSearch); ?>" placeholder="Cari..." aria-label="Cari NIM">
+            <div class="input-group-append">
+                <button class="btn btn-primary" type="submit" id="button-addon2">Cari</button>
+            </div>
+        </div>
+    </form> -->
+</div>
             <table class="table table-bordered mt-3">
                 <thead>
                     <tr>
@@ -158,19 +212,19 @@ $total_pages = ceil($total_data / $limit);
             </table>
             <ul class="pagination pagination-sm m-0 float-end">
                 <!-- Tombol Previous -->
-                <li class="page-item <?php if ($page <= 1) echo 'disabled'; ?>">
-                    <a class="page-link" href="?page=<?php echo $page - 1; ?>">«</a>
-                </li>
-                <!-- Tombol angka halaman -->
-                <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-                    <li class="page-item <?php if ($page == $i) echo 'active'; ?>">
-                        <a class="page-link" href="?page=<?php echo $i; ?>"><?php echo $i; ?></a>
-                    </li>
-                <?php endfor; ?>
-                <!-- Tombol Next -->
-                <li class="page-item <?php if ($page >= $total_pages) echo 'disabled'; ?>">
-                    <a class="page-link" href="?page=<?php echo $page + 1; ?>">»</a>
-                </li>
+    <li class="page-item <?php if ($page <= 1) echo 'disabled'; ?>">
+        <a class="page-link" href="?nim=<?php echo urlencode($nimSearch); ?>&page=<?php echo $page - 1; ?>">«</a>
+    </li>
+    <!-- Tombol angka halaman -->
+    <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+        <li class="page-item <?php if ($page == $i) echo 'active'; ?>">
+            <a class="page-link" href="?nim=<?php echo urlencode($nimSearch); ?>&page=<?php echo $i; ?>"><?php echo $i; ?></a>
+        </li>
+    <?php endfor; ?>
+    <!-- Tombol Next -->
+    <li class="page-item <?php if ($page >= $total_pages) echo 'disabled'; ?>">
+        <a class="page-link" href="?nim=<?php echo urlencode($nimSearch); ?>&page=<?php echo $page + 1; ?>">»</a>
+    </li>
             </ul>
         </div>
     </main>
