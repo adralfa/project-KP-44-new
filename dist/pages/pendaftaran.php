@@ -49,8 +49,8 @@
                                     <label for="jk" class="form-label">Jenis Kelamin</label>
                                     <select class="form-select" id="jk" name="jk" aria-label="Default select example" required>
                                         <option selected>--Pilih--</option>
-                                        <option value="1">Laki-laki</option>
-                                        <option value="2">Perempuan</option>
+                                        <option value="L">Laki-laki</option>
+                                        <option value="P">Perempuan</option>
                                     </select>
                                 </div>
                             </div>
@@ -59,11 +59,11 @@
                                     <label for="prodi" class="form-label">Program Studi</label>
                                     <select class="form-select" id="prodi" name="prodi" aria-label="Default select example" required>
                                         <option selected>--Pilih--</option>
-                                        <option value="1">Teknik Informatika - S1</option>
-                                        <option value="2">Sistem Informasi - S1</option>
-                                        <option value="3">Desain Komunikasi Visual - S1</option>
-                                        <option value="4">Manajemen Informatika - D3</option>
-                                        <option value="5">Teknik Sipil - S1</option>
+                                        <option value="TI">Teknik Informatika - S1</option>
+                                        <option value="SI">Sistem Informasi - S1</option>
+                                        <option value="DKV">Desain Komunikasi Visual - S1</option>
+                                        <option value="MI">Manajemen Informatika - D3</option>
+                                        <option value="TS">Teknik Sipil - S1</option>
                                   </select>
                                 </div>
                                 <div class="col-md-3">
@@ -74,12 +74,12 @@
                                     <label for="kelas" class="form-label">Kelas</label>
                                     <select class="form-select" id="kelas" name="kelas" aria-label="Default select example" required>
                                         <option selected>--Pilih--</option>
-                                        <option value="1">01</option>
-                                        <option value="2">02</option>
-                                        <option value="3">03</option>
-                                        <option value="4">04</option>
-                                        <option value="5">05</option>
-                                        <option value="6">06</option>
+                                        <option value="01">01</option>
+                                        <option value="02">02</option>
+                                        <option value="03">03</option>
+                                        <option value="04">04</option>
+                                        <option value="05">05</option>
+                                        <option value="06">06</option>
                                   </select>
                                 </div>
                             </div>
@@ -89,7 +89,7 @@
                                     <select class="form-select" id="mbkm" name="mbkm" aria-label="Default select example" required>
                                         <option selected>--Pilih--</option>
                                         <option value="1">Pernah ikut serta</option>
-                                        <option value="2">Tidak pernah ikut serta</option>
+                                        <option value="0">Tidak pernah ikut serta</option>
                                       </select>
                                 </div>
                                 <div class="col-md-5">

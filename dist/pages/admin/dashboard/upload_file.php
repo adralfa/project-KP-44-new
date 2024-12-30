@@ -13,11 +13,13 @@ function replaceFile($uploadDir, $fileName, $tmpFilePath) {
 
     // Pindahkan file baru ke lokasi target
     if (move_uploaded_file($tmpFilePath, $targetFilePath)) {
-        return "File berhasil diunggah dan diperbarui: <a href='$targetFilePath' target='_blank'>Lihat File</a>";
+        return true; // Berhasil diunggah
     } else {
-        return "Maaf, ada kesalahan saat mengunggah file.";
+        return false; // Gagal diunggah
     }
 }
+
+$redirectURL = "infokp.php"; // URL untuk redirect setelah upload
 
 // Penanganan form upload untuk file jadwal
 if (isset($_POST['uploadJadwal'])) {
@@ -25,11 +27,15 @@ if (isset($_POST['uploadJadwal'])) {
     $allowedTypes = array('jpg', 'jpeg', 'png', 'gif'); // Format gambar yang diperbolehkan
 
     if (in_array($fileType, $allowedTypes)) {
-        // Nama file tetap untuk jadwal
-        echo replaceFile($uploadDir, "jadwal_kp.jpg", $_FILES['jadwalFile']['tmp_name']);
+        if (replaceFile($uploadDir, "jadwal_kp.jpg", $_FILES['jadwalFile']['tmp_name'])) {
+            header("Location: $redirectURL?status=success&file=jadwal");
+        } else {
+            header("Location: $redirectURL?status=error&file=jadwal");
+        }
     } else {
-        echo "Hanya file gambar yang diperbolehkan (JPG, JPEG, PNG, GIF).";
+        header("Location: $redirectURL?status=invalid&file=jadwal");
     }
+    exit;
 }
 
 // Penanganan form upload untuk file pedoman
@@ -37,10 +43,14 @@ if (isset($_POST['uploadPedoman'])) {
     $fileType = strtolower(pathinfo($_FILES['pedomanFile']['name'], PATHINFO_EXTENSION));
 
     if ($fileType == 'pdf') {
-        // Nama file tetap untuk pedoman
-        echo replaceFile($uploadDir, "pedoman_kp.pdf", $_FILES['pedomanFile']['tmp_name']);
+        if (replaceFile($uploadDir, "pedoman_kp.pdf", $_FILES['pedomanFile']['tmp_name'])) {
+            header("Location: $redirectURL?status=success&file=pedoman");
+        } else {
+            header("Location: $redirectURL?status=error&file=pedoman");
+        }
     } else {
-        echo "Hanya file PDF yang diperbolehkan.";
+        header("Location: $redirectURL?status=invalid&file=pedoman");
     }
+    exit;
 }
 ?>

@@ -1,4 +1,14 @@
 <?php
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+    error_reporting(0);
+}
+
+if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] != 'mahasiswa') {
+    header("Location: ../../index.php");
+    exit;
+}
 // Direktori tempat file disimpan
 $uploadDir = "../../../assets/uploads/";
 
@@ -59,19 +69,19 @@ $pdfExists = file_exists($pdfFile);
                 <div class="sidebar-wrapper">
                     <nav class="mt-2"> <!--begin::Sidebar Menu-->
                         <ul class="nav sidebar-menu flex-column" role="menu">
-                            <li class="nav-item"> <a href="infokp.php" class="nav-link active"> <i class="nav-icon bi bi-circle"></i>
+                            <li class="nav-item"> <a href="infokp.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
                                 <p>Informasi KP</p>
                             </a> </li>
-                            <li class="nav-item"> <a href="infomhs.html" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                            <li class="nav-item"> <a href="infomhs.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
                                     <p>Info Mahasiswa</p>
                                 </a> </li>
-                            <li class="nav-item"> <a href="infokelompok.html" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                            <li class="nav-item"> <a href="infokelompok.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
                                     <p>Info Kelompok</p>
                                 </a> </li>
-                            <li class="nav-item"> <a href="suratkemitra.html" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                            <li class="nav-item"> <a href="suratkemitra.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
                                     <p>Surat ke Mitra</p>
                                 </a> </li>
-                            <li class="nav-item"> <a href="logout.html" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                            <li class="nav-item"> <a href="../../logout.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
                                     <p>Logout</p>
                                 </a> </li>
                         </ul>

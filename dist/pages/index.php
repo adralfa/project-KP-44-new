@@ -34,7 +34,7 @@ if (isset($_SESSION['error'])) {
     <div class="login-box">
         <div class="card card-outline card-primary">
             <div class="card-header"> <!--<a href="home.html" class="link-dark text-center link-offset-2 link-opacity-100 link-opacity-50-hover text-decoration-none">-->
-                    <h1 class="mb-0"> <b>LOGIN</b>
+                    <h1 class="mb-0 text-center"> <b>LOGIN</b>
                     </h1>
                 </a> </div>
             <div class="card-body login-card-body">
@@ -73,9 +73,9 @@ if (isset($_SESSION['error'])) {
     </div>
 </form>
 
-                <p class="mb-1"> <a href="forgot-password.html">I forgot my password</a> </p>
-                <p class="mb-0"> <a href="register.html" class="text-center">
-                        Register a new membership
+                <!-- <p class="mb-1"> <a href="forgot-password.html">I forgot my password</a> </p> -->
+                <p class="mb-0 text-center"> <a href="pendaftaran.php" class="text-center">
+                        Belum melakukan pendaftaran? Klik di sini.
                     </a> </p>
             </div> <!-- /.login-card-body -->
         </div>

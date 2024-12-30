@@ -11,6 +11,68 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] != 'admin') {
     header("Location: ../../index.php");
     exit;
 }
+
+// Folder tempat file akan disimpan
+$uploadDir = "../../../assets/uploads/";
+
+// Fungsi untuk mengganti file lama dengan nama tetap
+function replaceFile($uploadDir, $fileName, $tmpFilePath) {
+    $targetFilePath = $uploadDir . $fileName;
+
+    // Hapus file lama jika ada
+    if (file_exists($targetFilePath)) {
+        unlink($targetFilePath); // Hapus file lama
+    }
+
+    // Pindahkan file baru ke lokasi target
+    if (move_uploaded_file($tmpFilePath, $targetFilePath)) {
+        return true; // Berhasil diunggah
+    } else {
+        return false; // Gagal diunggah
+    }
+}
+
+// Variabel untuk menyimpan status upload
+$statusMessageIMG = '';
+$alertClassIMG = '';
+$statusMessagePDF = '';
+$alertClassPDF = '';
+
+// Penanganan upload file
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['uploadJadwal'])) {
+        $fileType = strtolower(pathinfo($_FILES['jadwalFile']['name'], PATHINFO_EXTENSION));
+        $allowedTypes = array('jpg', 'jpeg', 'png', 'gif'); // Format gambar yang diperbolehkan
+
+        if (in_array($fileType, $allowedTypes)) {
+            if (replaceFile($uploadDir, "jadwal_kp.jpg", $_FILES['jadwalFile']['tmp_name'])) {
+                $statusMessageIMG = 'File Jadwal berhasil diunggah!';
+                $alertClassIMG = 'alert-success';
+            } else {
+                $statusMessageIMG = 'Gagal mengunggah file Jadwal. Silakan coba lagi.';
+                $alertClassIMG = 'alert-danger';
+            }
+        } else {
+            $statusMessageIMG = 'Format file Jadwal tidak valid. Hanya JPG, JPEG, PNG, atau GIF yang diperbolehkan.';
+            $alertClassIMG = 'alert-warning';
+        }
+    } elseif (isset($_POST['uploadPedoman'])) {
+        $fileType = strtolower(pathinfo($_FILES['pedomanFile']['name'], PATHINFO_EXTENSION));
+
+        if ($fileType == 'pdf') {
+            if (replaceFile($uploadDir, "pedoman_kp.pdf", $_FILES['pedomanFile']['tmp_name'])) {
+                $statusMessagePDF = 'File Pedoman berhasil diunggah!';
+                $alertClassPDF = 'alert-success';
+            } else {
+                $statusMessagePDF = 'Gagal mengunggah file Pedoman. Silakan coba lagi.';
+                $alertClassPDF = 'alert-danger';
+            }
+        } else {
+            $statusMessagePDF = 'Format file Pedoman tidak valid. Hanya PDF yang diperbolehkan.';
+            $alertClassPDF = 'alert-warning';
+        }
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -21,6 +83,18 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] != 'admin') {
     <title>Admin Dashboard</title>
     <link rel="stylesheet" href="../../../css/adminlte.min.css" crossorigin="anonymous"/>
     <script src="../../../js/adminlte.min.js" crossorigin="anonymous"></script>
+    <style>
+        .alert-fixed {
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1050;
+            margin: 10px 0;
+            width: auto;
+            max-width: 80%;
+        }
+    </style>
 </head>
 <body>
     <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
@@ -106,11 +180,20 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] != 'admin') {
                         Nilai tambah dari kegiatan praktek ini bagi peserta diantaranya adalah mampu membentuk sikap mental/attitude dalam bekerja; Mampu mengidentifikasi, menganalisa dan merumuskan masalah selama berada di dunia kerja yang berdasarkan rasional tertentu yang dinilai penting dan bermanfaat ditinjau dari berbagai faktor; Mampu menganalisa, merancang dan mengembangkan sebuah perangkat lunak terapan maupun sistem informasi; Mampu melakukan tahapan metodologis dalam pembuatan produk dan karya desain komunikasi visual; Mampu mempresentasikan hasil Kerja Praktek ke dalam sebuah laporan yang tersusun secara sistematis sesuai dengan masalah yang diteliti serta mempertanggung jawabkannya.</p>
                     </div>
 
-                    <!-- <hr> -->
-
-                    <form action="upload_file.php" method="POST" enctype="multipart/form-data">
+                    <form action="" method="POST" enctype="multipart/form-data">
                         <div class="row px-5 py-3">
                             <label for="jadwalFile" class="form-label fw-bold">Upload Jadwal Kerja Praktik (Gambar)</label>
+                            <?php if (!empty($statusMessageIMG)): ?>
+            <div class="alert <?php echo $alertClassIMG; ?> alert-dismissible fade show alert-fixed" role="alert" id="alertIMG">
+                <?php echo $statusMessageIMG; ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <script>
+                setTimeout(function() {
+                    document.getElementById('alertIMG').classList.remove('show');
+                }, 3000);
+            </script>
+        <?php endif; ?>
                             <div class="col-9">
                                 <input class="form-control" type="file" id="jadwalFile" name="jadwalFile" accept="image/*">
                             </div>
@@ -121,24 +204,27 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] != 'admin') {
 
                         <div class="row px-5 py-3">
                             <label for="pedomanFile" class="form-label fw-bold">Upload Pedoman Kerja Praktik (PDF)</label>
+                            <?php if (!empty($statusMessagePDF)): ?>
+            <div class="alert <?php echo $alertClassPDF; ?> alert-dismissible fade show alert-fixed" role="alert" id="alertPDF">
+                <?php echo $statusMessagePDF; ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <script>
+                setTimeout(function() {
+                    document.getElementById('alertPDF').classList.remove('show');
+                }, 3000);
+            </script>
+        <?php endif; ?>
                             <div class="col-9">
-                                <input class="form-control" type="file" id="pedomanFile" name="pedomanFile" accept=".pdf">
+                                <input class="form-control" type="file" id="pedomanFile" name="pedomanFile" accept="application/pdf">
                             </div>
                             <div class="col-3">
                                 <button type="submit" name="uploadPedoman" class="btn btn-primary">Submit</button>
                             </div>
                         </div>
                     </form>
-
                 </div>
             </main>
-            <footer class="app-footer">
-                <strong>Copyright &copy; 2024 Kelompok 44 Kerja Praktek Universitas Kuningan 2024</strong>
-                All rights reserved.
-            </footer>
         </div>
     </body>
-</body>
 </html>
-
-<?php $conn->close(); ?>

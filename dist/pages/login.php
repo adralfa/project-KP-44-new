@@ -33,10 +33,38 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         exit;
     } else {
-        // Jika login gagal
+        $query = "SELECT * FROM mahasiswa WHERE email = '$email'";
+    $result = $conn->query($query);
+
+    if ($result->num_rows == 1) {
+        // Data ditemukan, ambil hasilnya
+        $user = $result->fetch_assoc();
+
+        // Verifikasi password menggunakan hash
+        if (password_verify($password, $user['password'])) {
+            // Jika password cocok
+            $_SESSION['user_nim'] = $user['nim'];
+            $_SESSION['user_name'] = $user['nama'];
+            $_SESSION['user_role'] = 'mahasiswa';
+
+            // Set pesan berhasil login
+            $_SESSION['success'] = "Login berhasil! Selamat datang, {$user['nama']}.";
+
+            // Redirect ke halaman dashboard
+            header("Location: user/dashboard/infokp.php");
+            exit;
+        } else {
+            // Jika password salah
+            $_SESSION['error'] = "Email atau password salah!";
+            header("Location: index.php");
+            exit;
+        }
+    } else {
+        // Jika email tidak ditemukan
         $_SESSION['error'] = "Email atau password salah!";
         header("Location: index.php");
         exit;
+    }
     }
 }
 ?>

@@ -1,3 +1,16 @@
+<?php
+// Direktori tempat file disimpan
+$uploadDir = "../assets/uploads/";
+
+// Nama file default
+$imageFile = $uploadDir . "jadwal_kp.jpg";
+$pdfFile = $uploadDir . "pedoman_kp.pdf";
+
+// Cek keberadaan file
+$imageExists = file_exists($imageFile);
+$pdfExists = file_exists($pdfFile);
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,38 +32,11 @@
                         <li class="nav-item d-none d-md-block"> <a href="#" class="nav-link">Contact</a> </li>
                     </ul> end::Start Navbar Links begin::End Navbar Links -->
                     <ul class="navbar-nav ms-auto"> <!--begin::Navbar Search-->
-                        <a href="index.html" class="text-white border-none"><input type="button" class="btn btn-primary me-3" value="MASUK"></button></a>
-                        <a href="pendaftaran.html" class="text-white border-none"><input type="button" class="btn btn-outline-primary" value="DAFTAR"></button></a>
+                        <a href="index.php" class="text-white border-none"><input type="button" class="btn btn-primary me-3" value="MASUK"></button></a>
+                        <a href="pendaftaran.php" class="text-white border-none"><input type="button" class="btn btn-outline-primary" value="DAFTAR"></button></a>
                     </ul> <!--end::End Navbar Links-->
                 </div> <!--end::Container-->
-            </nav> <!--end::Header--> <!--begin::Sidebar-->
-            <!-- <aside class="app-sidebar bg-primary shadow" data-bs-theme="dark"> begin::Sidebar Brand -->
-                <!-- <div class="sidebar-brand bg-light"> begin::Brand Link <a href="./home.html" class="brand-link"> begin::Brand Image <img src="/dist/assets/img/LOGOFKOM.png" alt="AdminLTE Logo" class="brand-image opacity-75 shadow"> end::Brand Image begin::Brand Text  </a> end::Brand Link </div> end::Sidebar Brand begin::Sidebar Wrapper -->
-                <!-- <div class="sidebar-wrapper">
-                    <nav class="mt-2">
-                        <ul class="nav sidebar-menu flex-column" role="menu">
-                            <li class="nav-item"> <a href="infokp.html" class="nav-link active"> <i class="nav-icon bi bi-circle"></i>
-                                <p>Informasi KP</p>
-                            </a> </li>
-                            <li class="nav-item"> <a href="home.html" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
-                                    <p>Data Mahasiswa</p>
-                                </a> </li>
-                            <li class="nav-item"> <a href="kelompok.html" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
-                                    <p>Data Kelompok</p>
-                                </a> </li>
-                            <li class="nav-item"> <a href="dosen.html" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
-                                    <p>Data Dosen</p>
-                                </a> </li>
-                            <li class="nav-item"> <a href="mitra.html" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
-                                    <p>Data Mitra</p>
-                                </a> </li>
-                                <li class="nav-item"> <a href="staff.html" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
-                                    <p>Data Staff</p>
-                                </a> </li>
-                        </ul>
-                    </nav> -->
-                <!-- </div> end::Sidebar Wrapper -->
-            <!-- </aside> end::Sidebar begin::App Main -->
+            </nav> <!--end::Header--> 
             <main class="app-main">
                 <div class="container-fluid">
                     <div class="row px-5 py-5" style="background-color: rgb(0, 0, 58); color: white;">
@@ -74,38 +60,31 @@
                             Nilai tambah dari kegiatan praktek ini bagi peserta diantaranya adalah mampu membentuk sikap mental/attitude dalam bekerja; Mampu mengidentifikasi, menganalisa dan merumuskan masalah selama berada di dunia kerja yang berdasarkan rasional tertentu yang dinilai penting dan bermanfaat ditinjau dari berbagai faktor; Mampu menganalisa, merancang dan mengembangkan sebuah perangkat lunak terapan maupun sistem informasi; Mampu melakukan tahapan metodologis dalam pembuatan produk dan karya desain komunikasi visual; Mampu mempresentasikan hasil Kerja Praktek ke dalam sebuah laporan yang tersusun secara sistematis sesuai dengan masalah yang diteliti serta mempertanggung jawabkannya.</p>
                             </div>
                             <div class="col-lg-4">
-                                <p class="text-center fw-bold">Informasi Jadwal Pelaksanaan Kerja Praktek</p>
-                                <div class="d-flex justify-content-center">
-                                    <img src="/dist/assets/img/Jadwal KP.jpg" alt="jadwal" style="width: 100%;">
-                                </div>
+                            <p class="text-center fw-bold">Informasi Jadwal Pelaksanaan Kerja Praktek</p>
+                            <div class="d-flex justify-content-center">
+                                <!-- <img src="/dist/assets/img/Jadwal KP.jpg" alt="jadwal" style="width: 100%;"> -->
+                                <?php if ($imageExists): ?>
+    <img src="<?php echo $imageFile . '?v=' . time(); ?>" alt="Jadwal KP" class="img-fluid shadow-sm" style="width: 100%;">
+<?php else: ?>
+    <p class="text-danger">File gambar jadwal belum diunggah.</p>
+<?php endif; ?>
+
                             </div>
                         </div>
-    
-                        <hr>
-    
-                        <!-- <div class="row mt-3 g-3"> -->
-                            <!-- <div class="col-lg-6"> -->
-                                <!-- <p>Informasi Jadwal Pelaksanaan Kerja Praktek</p>
-                                <div class="d-flex justify-content-center">
-                                    <img src="/dist/assets/img/Jadwal KP.jpg" alt="jadwal" style="width: 40%;">
-                                </div> -->
-                            <!-- </div> -->
-                            <!-- <div class="col-lg-6">
-                                <p>Ini nanti dipakai untuk menampilkan file</p>
-                            <div class="d-flex justify-content-center">
-                                <embed type="application/pdf" src="/dist/assets/pdf/Pedoman-KP-2023-2024-fix-3.pdf" width="100%" height="800"></embed>
-                            </div>
-                            </div> -->
-                        <!-- </div>
-    
-                        <hr> -->
-    
-                        <div class="row mt-3">
-                            <!-- <p>Ini nanti dipakai untuk menampilkan file</p> -->
-                            <div class="d-flex justify-content-center">
-                                <embed type="application/pdf" src="/dist/assets/pdf/Pedoman-KP-2023-2024-fix-3.pdf" width="80%" height="600"></embed>
-                            </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="row mt-3 px-5 py-3">
+                        <div class="d-flex justify-content-center">
+                            <!-- <embed type="application/pdf" src="/dist/assets/pdf/Pedoman-KP-2023-2024-fix-3.pdf" width="80%" height="600"></embed> -->
+                            <?php if ($pdfExists): ?>
+                    <embed type="application/pdf" src="<?php echo $pdfFile. '?v=' . time(); ?>" width="100%" height="600"></embed>
+                <?php else: ?>
+                    <p class="text-danger">File pedoman belum diunggah.</p>
+                <?php endif; ?>
                         </div>
+                    </div>
                     </div>
                 </div>
             </main>
