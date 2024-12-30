@@ -25,7 +25,7 @@ if ($result->num_rows > 0) {
 $status_val = $mahasiswa['status_validasi'] == 1 ? "Valid" : "Belum Valid";
 
 // Proses pembaruan data
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if (isset($_POST['submit_data'])) {
     $nama = $conn->real_escape_string($_POST['nama']);
     $prodi = $conn->real_escape_string($_POST['prodi']);
     $angkatan = $conn->real_escape_string($_POST['angkatan']);
@@ -41,9 +41,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     WHERE nim = '$user_nim'";
 
     if ($conn->query($updateQuery)) {
-        $successMessage = "Data berhasil diperbarui!";
+        $_SESSION['success_message'] = "Data berhasil diperbarui!";
+        header("Location: infomhs.php");
+        exit;
     } else {
-        $errorMessage = "Gagal memperbarui data: " . $conn->error;
+        $_SESSION['error_message'] = "Gagal memperbarui data: " . $conn->error;
+        header("Location: infomhs.php");
+        exit;
     }
 }
 
@@ -60,23 +64,32 @@ if (isset($_POST['submit_upload'])) {
         $file_ext = pathinfo($file_name, PATHINFO_EXTENSION);
 
         if (in_array($file_ext, $allowed_extensions)) {
+            $existing_file = $upload_dir . $mahasiswa['nim'] . "_bukti-pembayaran." . pathinfo($mahasiswa['file_upload'], PATHINFO_EXTENSION);
+            if (file_exists($existing_file)) {
+                unlink($existing_file); // Hapus file lama
+            }
             if (move_uploaded_file($file_tmp, $file_path)) {
                 // Simpan nama file ke database
                 $updateFileQuery = "UPDATE mahasiswa SET file_upload = '$file_name' WHERE nim = '$user_nim'";
                 if ($conn->query($updateFileQuery)) {
-                    header("Location: infomhs.php?upload_success=1");
+                    $_SESSION['success_message'] = "File berhasil diunggah dan disimpan!";
+                    header("Location: infomhs.php");
                     exit;
                 } else {
-                    $errorUploadMessage = "Gagal menyimpan nama file: " . $conn->error;
+                    $_SESSION['error_message'] = "Gagal menyimpan nama file: " . $conn->error;
+                    header("Location: infomhs.php");
                 }
             } else {
-                $errorUploadMessage = "Gagal mengunggah file.";
+                $_SESSION['error_message'] = "Gagal mengunggah file.";
+                header("Location: infomhs.php");
             }
         } else {
-            $errorUploadMessage = "Ekstensi file tidak diizinkan. Hanya JPG, JPEG, PNG yang diperbolehkan.";
+            $_SESSION['error_message'] = "Ekstensi file tidak diizinkan. Hanya JPG, JPEG, PNG yang diperbolehkan.";
+            header("Location: infomhs.php");
         }
     } else {
-        $errorUploadMessage = "Terjadi kesalahan saat mengunggah file.";
+        $_SESSION['error_message'] = "Terjadi kesalahan saat mengunggah file.";
+        header("Location: infomhs.php");
     }
 }
 ?>
@@ -104,29 +117,21 @@ if (isset($_POST['submit_upload'])) {
 </head>
 <body>
     <body class="layout-fixed sidebar-expand-lg">
-    <?php if (!empty($successMessage)): ?>
-    <div class="alert alert-success alert-dismissible alert-fixed mx-3 mt-3 fade show" id="alert" role="alert">
-        <?= $successMessage ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-<?php elseif (!empty($errorMessage)): ?>
-    <div class="alert alert-danger alert-dismissible alert-fixed mx-3 mt-3 fade show" id="alert" role="alert">
-        <?= $errorMessage ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-<?php endif; ?>
 
-<?php if (isset($_GET['upload_success'])): ?>
-        <div class="alert alert-success alert-dismissible alert-fixed mx-3 mt-3 fade show" id="alert" role="alert">
-            File berhasil diunggah dan disimpan!
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-<?php elseif (!empty($errorUploadMessage)): ?>
-        <div class="alert alert-danger alert-dismissible alert-fixed mx-3 mt-3 fade show" id="alert" role="alert">
-            <?= $errorUploadMessage ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-<?php endif; ?>
+    <?php if (isset($_SESSION['success_message'])): ?>
+    <div class="alert alert-success alert-dismissible alert-fixed mx-3 mt-3 fade show" id="alert" role="alert">
+        <?= $_SESSION['success_message'] ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <?php unset($_SESSION['success_message']); endif; ?>
+
+    <?php if (isset($_SESSION['error_message'])): ?>
+    <div class="alert alert-danger alert-dismissible alert-fixed mx-3 mt-3 fade show" id="alert" role="alert">
+        <?= $_SESSION['error_message'] ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <?php unset($_SESSION['error_message']); endif; ?>
+
         <div class="app-wrapper">
             <nav class="app-header navbar navbar-expand bg-body">
                 <div class="container-fluid">
@@ -171,7 +176,7 @@ if (isset($_POST['submit_upload'])) {
                     
 
                     <?php if ($mahasiswa): ?>
-                    <form action="" method="post" class="row g-3 py-5">
+                    <form action="<?= htmlspecialchars($_SERVER['PHP_SELF']) . '?v=' . time(); ?>" method="post" class="row g-3 py-5">
                         <div class="row mb-3">
                             <label for="emailform" class="col-sm-2 col-form-label">Email</label>
                             <div class="col-sm-10">
@@ -190,12 +195,13 @@ if (isset($_POST['submit_upload'])) {
                                 <input type="text" name="nama" class="form-control" id="nama" value="<?= htmlspecialchars($mahasiswa['nama']) ?>" required>
                             </div>
                         </div>
+
                         <div class="row mb-3">
                             <label for="jk" class="col-sm-2 col-form-label">Jenis Kelamin</label>
                             <div class="col-sm-10">
-                                <select name="jk" id="jk" class="form-select">
-                                    <option value="L" <?= $mahasiswa['jk'] === 'Laki-Laki' ? 'selected' : '' ?>>Laki-Laki</option>
-                                    <option value="P" <?= $mahasiswa['jk'] === 'Perempuan' ? 'selected' : '' ?>>Perempuan</option>
+                                <select name="jk" id="jk" class="form-select" disabled>
+                                    <option value="L" <?= $mahasiswa['jk'] === 'L' ? 'selected' : '' ?>>Laki-Laki</option>
+                                    <option value="P" <?= $mahasiswa['jk'] === 'P' ? 'selected' : '' ?>>Perempuan</option>
                                 </select>
                             </div>
                         </div>
@@ -203,11 +209,11 @@ if (isset($_POST['submit_upload'])) {
                             <label for="prodi" class="col-sm-2 col-form-label">Program Studi</label>
                             <div class="col-sm-10">
                                 <select name="prodi" id="prodi" class="form-select">
-                                    <option value="TI" <?= $mahasiswa['prodi'] === 'Teknik Informatika - S1' ? 'selected' : '' ?>>Teknik Informatika - S1</option>
-                                    <option value="SI" <?= $mahasiswa['prodi'] === 'Sistem Informasi - S1' ? 'selected' : '' ?>>Sistem Informasi - S1</option>
-                                    <option value="DKV" <?= $mahasiswa['prodi'] === 'Desain Komunikasi Visual - S1' ? 'selected' : '' ?>>Desain Komunikasi Visual - S1</option>
-                                    <option value="MI" <?= $mahasiswa['prodi'] === 'Manajemen Informatika - D3' ? 'selected' : '' ?>>Manajemen Informatika - D3</option>
-                                    <option value="TS" <?= $mahasiswa['prodi'] === 'Teknik Sipil - S1' ? 'selected' : '' ?>>Teknik Sipil - S1</option>
+                                    <option value="TI" <?= $mahasiswa['prodi'] === 'TI' ? 'selected' : '' ?>>Teknik Informatika - S1</option>
+                                    <option value="SI" <?= $mahasiswa['prodi'] === 'SI' ? 'selected' : '' ?>>Sistem Informasi - S1</option>
+                                    <option value="DKV" <?= $mahasiswa['prodi'] === 'DKV' ? 'selected' : '' ?>>Desain Komunikasi Visual - S1</option>
+                                    <option value="MI" <?= $mahasiswa['prodi'] === 'MI' ? 'selected' : '' ?>>Manajemen Informatika - D3</option>
+                                    <option value="TS" <?= $mahasiswa['prodi'] === 'TS' ? 'selected' : '' ?>>Teknik Sipil - S1</option>
                                 </select>
                             </div>
                         </div>
@@ -234,8 +240,8 @@ if (isset($_POST['submit_upload'])) {
                             <label for="mbkm" class="col-sm-2 col-form-label">Keikutsertaan MBKM</label>
                             <div class="col-sm-10">
                                 <select name="mbkm" id="mbkm" class="form-select">
-                                    <option value="1" <?= $mahasiswa['mbkm'] === 'Pernah' ? 'selected' : '' ?>>Pernah ikut serta</option>
-                                    <option value="0" <?= $mahasiswa['mbkm'] === 'Tidak Pernah' ? 'selected' : '' ?>>Tidak pernah ikut serta</option>
+                                    <option value="1" <?= $mahasiswa['mbkm'] === '1' ? 'selected' : '' ?>>Pernah ikut serta</option>
+                                    <option value="0" <?= $mahasiswa['mbkm'] === '0' ? 'selected' : '' ?>>Tidak pernah ikut serta</option>
                                 </select>
                             </div>
                         </div>
@@ -246,7 +252,7 @@ if (isset($_POST['submit_upload'])) {
                             </div>
                         </div>
                         <div class="col-12">
-                            <button class="btn btn-primary" type="submit">PERBARUI</button>
+                            <button class="btn btn-primary" type="submit" name="submit_data">PERBARUI</button>
                         </div>
                     </form>
                     <?php endif; ?>
@@ -255,7 +261,7 @@ if (isset($_POST['submit_upload'])) {
 
                     <h1>Upload Bukti Pembayaran</h1>
 
-                    <form action="" method="post" enctype="multipart/form-data">
+                    <form action="<?= htmlspecialchars($_SERVER['PHP_SELF']) . '?v=' . time(); ?>" method="post" enctype="multipart/form-data">
                         <div class="row py-3">
                             <label for="formFile" class="col-sm-2 col-form-label">Upload Bukti Pembayaran</label>
                             <div class="col-sm-10">
