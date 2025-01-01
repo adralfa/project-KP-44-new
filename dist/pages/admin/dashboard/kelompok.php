@@ -1,8 +1,8 @@
 <?php
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
-    error_reporting(0); // Matikan error reporting untuk produksi
-    ini_set('display_errors', 0); // Jangan tampilkan error di browser
+    error_reporting(0);
+
 }
 if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] != 'admin') {
     header("Location: ../../index.php");
@@ -12,93 +12,227 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] != 'admin') {
 require '../../koneksi.php'; // File koneksi ke database
 
 if (isset($_POST['generate_team'])) {
-    // Ambil mahasiswa yang belum tergabung dalam kelompok
-    $query = "SELECT * FROM mahasiswa WHERE nim NOT IN (SELECT nim FROM kpconnection) ORDER BY nim ASC";
-    $result = $conn->query($query);
+    // Ambil data mahasiswa yang belum memiliki kelompok
+    $query = "SELECT * FROM mahasiswa 
+    WHERE nim NOT IN (SELECT nim FROM kpconnection) 
+    ORDER BY CASE prodi
+    WHEN 'DKV' THEN 1
+    WHEN 'MI' THEN 2
+    WHEN 'SI' THEN 3
+    WHEN 'TI' THEN 4
+    WHEN 'TS' THEN 5
+    ELSE 6 -- Jika ada prodi lain yang tidak disebutkan
+    END, angkatan, kelas, mbkm, nim";
+$result = $conn->query($query);
+
+
     if ($result->num_rows == 0) {
         echo "Tidak ada mahasiswa yang belum tergabung dalam kelompok.";
-        exit();
+        exit;
     }
+
     $mahasiswa = $result->fetch_all(MYSQLI_ASSOC);
 
-    // Pengelompokan awal berdasarkan prodi, angkatan, kelas, MBKM
-    $grouped_mahasiswa = [];
+    // Kelompokkan mahasiswa berdasarkan prodi
+    $grouped_by_prodi = [];
     foreach ($mahasiswa as $mhs) {
-        $key = $mhs['prodi'] . '-' . $mhs['angkatan'] . '-' . $mhs['kelas'] . '-' . $mhs['mbkm'];
-        $grouped_mahasiswa[$key][] = $mhs;
+        $key = $mhs['prodi'];
+        $grouped_by_prodi[$key][] = $mhs;
     }
 
-    $valid_groups = [];
-    $remaining_students = [];
-    $kelompok_counter = 1;
+    // Atur kelompok counter
+    $kelompok_counter = $conn->query("SELECT COUNT(*) as total FROM kelompok")->fetch_assoc()['total'] + 1;
 
-    // Tahap 1: Buat kelompok 4 orang berdasarkan kategori penuh
-    foreach ($grouped_mahasiswa as $key => $students) {
-        if (count($students) >= 4) {
-            shuffle($students);
-            $chunks = array_chunk($students, 4);
-            foreach ($chunks as $chunk) {
-                if (count($chunk) == 4) {
-                    $valid_groups[] = $chunk;
-                } else {
-                    $remaining_students = array_merge($remaining_students, $chunk);
-                }
-            }
-        } else {
-            $remaining_students = array_merge($remaining_students, $students);
-        }
-    }
+    $remaining_students = []; // Array untuk menyimpan mahasiswa sisa
 
-    // Tahap 2: Gabungkan sisa mahasiswa berdasarkan prodi dan MBKM
-    $grouped_remaining = [];
-    foreach ($remaining_students as $mhs) {
-        $key = $mhs['prodi'] . '-' . $mhs['mbkm'];
-        $grouped_remaining[$key][] = $mhs;
-    }
+    foreach ($grouped_by_prodi as $prodi => $the_prodi) {
+        $total_students = count($the_prodi);
 
-    $remaining_students = [];
-    foreach ($grouped_remaining as $key => $students) {
-        if (count($students) >= 4) {
-            shuffle($students);
-            $chunks = array_chunk($students, 4);
-            foreach ($chunks as $chunk) {
-                if (count($chunk) == 4) {
-                    $valid_groups[] = $chunk;
-                } else {
-                    $remaining_students = array_merge($remaining_students, $chunk);
-                }
-            }
-        } else {
-            $remaining_students = array_merge($remaining_students, $students);
-        }
-    }
-
-    // Tahap 3: Masukkan sisa mahasiswa ke kelompok yang sudah ada (maksimal 5 anggota per kelompok)
-    foreach ($remaining_students as $mhs) {
-        $added = false;
-        foreach ($valid_groups as &$group) {
-            if (count($group) < 5 && $group[0]['prodi'] == $mhs['prodi'] && $group[0]['mbkm'] == $mhs['mbkm']) {
-                $group[] = $mhs;
-                $added = true;
-                break;
-            }
-        }
-        if (!$added) {
-            $valid_groups[] = [$mhs];
-        }
-    }
-
-    // Simpan kelompok ke database
-    foreach ($valid_groups as $group) {
-        if (count($group) > 0) { // Kelompok tidak kosong
+        // Jika jumlah mahasiswa <= 5, buat satu kelompok
+        if ($total_students <= 5) {
             $conn->query("INSERT INTO kelompok (no_kelompok) VALUES ($kelompok_counter)");
-            foreach ($group as $mhs) {
-                $conn->query("INSERT INTO kpconnection (nim, no_kelompok) VALUES ('{$mhs['nim']}', $kelompok_counter)");
+            foreach ($the_prodi as $mhs) {
+                $nim = $mhs['nim'];
+
+                // Cek apakah mahasiswa sudah tergabung dalam kelompok lain
+                $check_query = "SELECT * FROM kpconnection WHERE nim = '$nim'";
+                $check_result = $conn->query($check_query);
+                if ($check_result->num_rows == 0) { // Jika mahasiswa belum terdaftar
+                   $conn->query("INSERT INTO kpconnection (nim, no_kelompok) VALUES ('$nim', $kelompok_counter)");
+                }
             }
             $kelompok_counter++;
+            continue;
+        }
+
+        // Jika jumlah mahasiswa adalah 6 atau 7, bagi menjadi 2 kelompok (3-3 atau 3-4)
+        if ($total_students == 6 || $total_students == 7) {
+            $chunks = array_chunk($the_prodi, ceil($total_students / 2));
+            foreach ($chunks as $chunk) {
+                $conn->query("INSERT INTO kelompok (no_kelompok) VALUES ($kelompok_counter)");
+                foreach ($chunk as $mhs) {
+                    $nim = $mhs['nim'];
+
+                    // Cek apakah mahasiswa sudah tergabung dalam kelompok lain
+                    $check_query = "SELECT * FROM kpconnection WHERE nim = '$nim'";
+                    $check_result = $conn->query($check_query);
+                    if ($check_result->num_rows == 0) { // Jika mahasiswa belum terdaftar
+                       $conn->query("INSERT INTO kpconnection (nim, no_kelompok) VALUES ('$nim', $kelompok_counter)");
+                    }
+                }
+               $kelompok_counter++;
+            }
+            continue;
+        }
+
+        // === Langkah 1: Prioritas 1 (Prodi, Angkatan, Kelas, MBKM) ===
+        $grouped_by_criteria = [];
+        foreach ($mahasiswa as $mhs) {
+            if ($mhs['prodi'] == 'SI' && $mhs['angkatan'] == 2021 && $mhs['kelas'] == 06) {
+                $key = 'SI-2021-06';
+                $grouped_by_criteria[$key][] = $mhs;
+            } else {
+                $key = $mhs['prodi'] . '-' . $mhs['angkatan'] . '-' . $mhs['kelas'] . '-' . $mhs['mbkm'];
+                $grouped_by_criteria[$key][] = $mhs;
+            }
+        }
+
+        $remaining_students = []; // Untuk mahasiswa yang belum masuk kelompok
+        foreach ($grouped_by_criteria as $criteria_key => $group) {
+            if ($key == 'SI-2021-06') {
+                while (count($group) >= 4) {
+                    $chunk = array_splice($group, 0, 4);
+                    $conn->query("INSERT INTO kelompok (no_kelompok) VALUES ($kelompok_counter)");
+                    foreach ($chunk as $mhs) {
+                        $nim = $mhs['nim'];
+
+                        // Cek apakah mahasiswa sudah tergabung dalam kelompok lain
+                        $check_query = "SELECT * FROM kpconnection WHERE nim = '$nim'";
+                        $check_result = $conn->query($check_query);
+                        if ($check_result->num_rows == 0) { // Jika mahasiswa belum terdaftar
+                            $conn->query("INSERT INTO kpconnection (nim, no_kelompok) VALUES ('$nim', $kelompok_counter)");
+                        }
+                    }
+                    $kelompok_counter++;
+                }
+            } else {
+                while (count($group) >= 4) {
+                    $chunk = array_splice($group, 0, 4);
+                    $conn->query("INSERT INTO kelompok (no_kelompok) VALUES ($kelompok_counter)");
+                    foreach ($chunk as $mhs) {
+                        $nim = $mhs['nim'];
+
+                        // Cek apakah mahasiswa sudah tergabung dalam kelompok lain
+                        $check_query = "SELECT * FROM kpconnection WHERE nim = '$nim'";
+                        $check_result = $conn->query($check_query);
+                        if ($check_result->num_rows == 0) { // Jika mahasiswa belum terdaftar
+                            $conn->query("INSERT INTO kpconnection (nim, no_kelompok) VALUES ('$nim', $kelompok_counter)");
+                        }
+                    }
+                    $kelompok_counter++;
+                }
+            }
+            if (!empty($group)) {
+                $remaining_students = array_merge($remaining_students, $group);
+            }
+        }
+
+        // === Langkah 2: Prioritas 2 (Prodi, Angkatan, MBKM) ===
+        $grouped_by_criteria = [];
+        foreach ($remaining_students as $mhs) {
+            if ($mhs['prodi'] == 'SI' && $mhs['angkatan'] == 2021 && $mhs['kelas'] == 06) {
+                $key2 = 'SI-2021-06';
+                $grouped_by_criteria[$key2][] = $mhs;
+            } else {
+                $key2 = $mhs['prodi'] . '-' . $mhs['angkatan'] . '-' . $mhs['mbkm'];
+                $grouped_by_criteria[$key2][] = $mhs;
+            }
+        }
+
+        $remaining_students = []; // Reset mahasiswa yang belum masuk kelompok
+        foreach ($grouped_by_criteria as $criteria_key => $group) {
+            if ($key2 != 'SI-2021-06') {
+                while (count($group) >= 4) {
+                    $chunk = array_splice($group, 0, 4);
+                    $conn->query("INSERT INTO kelompok (no_kelompok) VALUES ($kelompok_counter)");
+                    foreach ($chunk as $mhs) {
+                        $nim = $mhs['nim'];
+    
+                        // Cek apakah mahasiswa sudah tergabung dalam kelompok lain
+                        $check_query = "SELECT * FROM kpconnection WHERE nim = '$nim'";
+                        $check_result = $conn->query($check_query);
+                        if ($check_result->num_rows == 0) { // Jika mahasiswa belum terdaftar
+                            $conn->query("INSERT INTO kpconnection (nim, no_kelompok) VALUES ('$nim', $kelompok_counter)");
+                        }
+                    }
+                    $kelompok_counter++;
+                }
+            }
+            if (!empty($group)) {
+                $remaining_students = array_merge($remaining_students, $group);
+            }
+        }
+
+        // === Langkah 3: Penyebaran Mahasiswa Sisa ===
+        if (!empty($remaining_students)) {
+            foreach ($remaining_students as $mhs) {
+                $nim = $mhs['nim'];
+                $prodi = $mhs['prodi'];
+                $angkatan = $mhs['angkatan'];
+                $kelas = $mhs['kelas'];
+                $mbkm = $mhs['mbkm'];
+
+                // Cek apakah mahasiswa sudah tergabung dalam kelompok lain
+                $check_query = "SELECT * FROM kpconnection WHERE nim = '$nim'";
+                $check_result = $conn->query($check_query);
+                if ($check_result->num_rows == 0) { // Jika mahasiswa belum terdaftar
+                    if ($prodi == 'SI' && $angkatan == 2021 && $kelas == 06) {
+                        // Cari kelompok yang memenuhi Prioritas 1 (Prodi, Angkatan, Kelas, MBKM)
+                        $query = "SELECT k.no_kelompok 
+                            FROM kpconnection kc
+                            JOIN mahasiswa m ON kc.nim = m.nim
+                            JOIN kelompok k ON kc.no_kelompok = k.no_kelompok
+                            WHERE m.prodi = '$prodi' AND m.angkatan = $angkatan
+                            AND m.kelas = '06'
+                            GROUP BY k.no_kelompok
+                            HAVING COUNT(*) < 5 LIMIT 1";
+                        $result = $conn->query($query);
+                    } else {
+                        // Cari kelompok yang memenuhi Prioritas 1 (Prodi, Angkatan, Kelas, MBKM)
+                        $query = "SELECT k.no_kelompok 
+                            FROM kpconnection kc
+                            JOIN mahasiswa m ON kc.nim = m.nim
+                            JOIN kelompok k ON kc.no_kelompok = k.no_kelompok
+                            WHERE m.prodi = '$prodi' AND m.angkatan = $angkatan
+                            AND m.kelas = '$kelas' AND m.mbkm = $mbkm
+                            GROUP BY k.no_kelompok
+                            HAVING COUNT(*) < 5 LIMIT 1";
+                        $result = $conn->query($query);
+                        
+                        // Jika tidak ditemukan kelompok Prioritas 1, cari Prioritas 2
+                        if ($result->num_rows == 0) {
+                            $query = "SELECT k.no_kelompok 
+                                FROM kpconnection kc
+                                JOIN mahasiswa m ON kc.nim = m.nim
+                                JOIN kelompok k ON kc.no_kelompok = k.no_kelompok
+                                WHERE m.prodi = '$prodi' AND m.angkatan = $angkatan 
+                                AND m.mbkm = $mbkm
+                                GROUP BY k.no_kelompok
+                                HAVING COUNT(*) < 5 LIMIT 1";
+                            $result = $conn->query($query);
+                        }
+                    }
+
+                    if ($result->num_rows > 0) {
+                        // Tambahkan ke kelompok yang sudah ada
+                        $row = $result->fetch_assoc();
+                        $no_kelompok = $row['no_kelompok'];
+                        $conn->query("INSERT INTO kpconnection (nim, no_kelompok) VALUES ('$nim', $no_kelompok)");
+                    }
+                }
+            }
         }
     }
-
     // Bagikan dosen ke kelompok
     $kelompok = $conn->query("SELECT no_kelompok FROM kelompok")->fetch_all(MYSQLI_ASSOC);
     $dosen = $conn->query("SELECT nik FROM dosen")->fetch_all(MYSQLI_ASSOC);
@@ -107,9 +241,11 @@ if (isset($_POST['generate_team'])) {
     $total_kelompok = count($kelompok);
     $total_dosen = count($dosen);
 
+    // Hitung jumlah kelompok per dosen
     $base_count = intdiv($total_kelompok, $total_dosen);
     $remainder = $total_kelompok % $total_dosen;
 
+    // Distribusi kelompok per dosen
     $dosen_kelompok = array_fill(0, $total_dosen, $base_count);
     $sisa_indices = range(0, $total_dosen - 1);
     shuffle($sisa_indices);
@@ -161,13 +297,13 @@ if (isset($_POST['generate_team'])) {
                     <li class="nav-item dropdown user-menu">
                         <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
                             <img src="/dist/assets/img/user2-160x160.jpg" class="user-image rounded-circle shadow" alt="User Image">
-                            <span class="d-none d-md-inline">Alexander Pierce</span>
+                            <span class="d-none d-md-inline"><?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
                             <li class="user-header text-bg-primary">
                                 <img src="/dist/assets/img/user2-160x160.jpg" class="rounded-circle shadow" alt="User Image">
                                 <p>
-                                    Alexander Pierce - Web Developer
+                                <?php echo htmlspecialchars($_SESSION['user_name']); ?>
                                     <small>Member since Nov. 2023</small>
                                 </p>
                             </li>
@@ -182,23 +318,51 @@ if (isset($_POST['generate_team'])) {
         </nav>
         <aside class="app-sidebar shadow" style="background-color: rgb(0, 0, 58); color: white;" data-bs-theme="dark">
         <div class="sidebar-brand bg-light"> <!--begin::Brand Link--> <a href="./home.html" class="brand-link"> <!--begin::Brand Image--> <img src="/dist/assets/img/LOGOFKOM.png" alt="AdminLTE Logo" class="brand-image opacity-75 shadow"> <!--end::Brand Image--> <!--begin::Brand Text-->  </a> <!--end::Brand Link--> </div> <!--end::Sidebar Brand--> <!--begin::Sidebar Wrapper-->
-            <div class="sidebar-wrapper">
-                <nav class="mt-2">
+        <div class="sidebar-wrapper">
+                    <nav class="mt-2"> <!--begin::Sidebar Menu-->
                     <ul class="nav sidebar-menu flex-column" role="menu">
-                        <li class="nav-item"><a href="infokp.php" class="nav-link"><p>Informasi KP</p></a></li>
-                        <li class="nav-item"><a href="mahasiswa.php" class="nav-link"><p>Data Mahasiswa</p></a></li>
-                        <li class="nav-item"><a href="kelompok.php" class="nav-link"><p>Data Kelompok</p></a></li>
-                        <li class="nav-item"><a href="dosen.php" class="nav-link"><p>Data Dosen</p></a></li>
-                        <li class="nav-item"><a href="../../logout.php" class="nav-link"><p>Logout</p></a></li>
-                    </ul>
-                </nav>
-            </div>
+                            <li class="nav-item"> <a href="infokp.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                                <p>Informasi KP</p>
+                            </a> </li>
+                            <li class="nav-item"> <a href="mahasiswa.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                                    <p>Data Mahasiswa</p>
+                                </a> </li>
+                            <li class="nav-item"> <a href="kelompok.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                                    <p>Data Kelompok</p>
+                                </a> </li>
+                            <li class="nav-item"> <a href="dosen.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                                    <p>Data Dosen</p>
+                                </a> </li>
+                            <li class="nav-item"> <a href="mitra.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                                    <p>Data Mitra</p>
+                                </a> </li>
+                            <!-- <li class="nav-item"> <a href="staff.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                                    <p>Data Staff</p>
+                                </a> </li> -->
+                            <li class="nav-item"> <a href="../../logout.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                                    <p>Logout</p>
+                                </a> </li>
+                        </ul>
+                    </nav>
+                </div> <!--end::Sidebar Wrapper-->
         </aside>
         <main class="app-main">
             <div class="container-fluid px-5 py-3">
                 <h1>Data Kelompok Kerja Praktek</h1>
                 <p>Data Mahasiswa Kerja Praktek Per Kelompok</p>
-                <?php 
+                <div class="row">
+                    <div class="col d-flex justify-content-end">
+                    <p class="me-3">
+                            Mahasiswa yang tergabung ke kelompok : 
+                            <?php
+                        $mahasiswa_counter = $conn->query("SELECT COUNT(*) as total FROM kpconnection")->fetch_assoc()['total'];
+                        echo $mahasiswa_counter . "/";
+
+                        $mahasiswa_counter2 = $conn->query("SELECT COUNT(*) as total FROM mahasiswa")->fetch_assoc()['total'];
+                        echo $mahasiswa_counter2;
+                    ?>
+                        </p>
+                    <?php 
                 if (isset($_SESSION['success'])): 
                     header('Location: kelompok.php');
                     ?>
@@ -208,6 +372,9 @@ if (isset($_POST['generate_team'])) {
                 <form method="POST">
                     <input type="submit" class="btn btn-primary" name="generate_team" value="BUAT KELOMPOK BARU">
                 </form>
+                    </div>        
+                </div>
+
                 <table class="table table-bordered mt-3">
                     <thead>
                         <tr>
@@ -248,7 +415,7 @@ while ($row = $result->fetch_assoc()) {
 
         // Tampilkan no_kelompok dengan rowspan
         echo "<tr>";
-        echo "<td rowspan=\"$group_count\">{$row['no_kelompok']}</td>";
+        echo "<td rowspan=\"$group_count\">Kelompok {$row['no_kelompok']}</td>";
         echo "<td>{$row['nim']}</td>";
         echo "<td>{$row['nama']}</td>";
         echo "<td>{$row['jk']}</td>";
@@ -270,83 +437,6 @@ while ($row = $result->fetch_assoc()) {
 
                     </tbody>
                 </table>
-                <nav>
-    <ul class="pagination justify-content-center">
-        <!-- Tombol "First" -->
-        <?php if ($current_page > 1): ?>
-            <li class="page-item">
-                <a class="page-link" href="?page=1" aria-label="First">
-                    <span aria-hidden="true">&laquo;&laquo;</span>
-                </a>
-            </li>
-            <li class="page-item">
-                <a class="page-link" href="?page=<?= $current_page - 1 ?>" aria-label="Previous">
-                    <span aria-hidden="true">&laquo;</span>
-                </a>
-            </li>
-        <?php else: ?>
-            <li class="page-item disabled">
-                <a class="page-link" href="#" aria-label="First">
-                    <span aria-hidden="true">&laquo;&laquo;</span>
-                </a>
-            </li>
-            <li class="page-item disabled">
-                <a class="page-link" href="#" aria-label="Previous">
-                    <span aria-hidden="true">&laquo;</span>
-                </a>
-            </li>
-        <?php endif; ?>
-
-        <!-- Range Angka Pagination -->
-        <?php
-        $start = max(1, $current_page - 2); // Awal angka pagination
-        $end = min($total_pages, $current_page + 2); // Akhir angka pagination
-
-        if ($start > 1): ?>
-            <li class="page-item">
-                <a class="page-link" href="?page=<?= $start - 1 ?>">...</a>
-            </li>
-        <?php endif;
-
-        for ($i = $start; $i <= $end; $i++): ?>
-            <li class="page-item <?= $i == $current_page ? 'active' : '' ?>">
-                <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
-            </li>
-        <?php endfor;
-
-        if ($end < $total_pages): ?>
-            <li class="page-item">
-                <a class="page-link" href="?page=<?= $end + 1 ?>">...</a>
-            </li>
-        <?php endif; ?>
-
-        <!-- Tombol "Next" dan "Last" -->
-        <?php if ($current_page < $total_pages): ?>
-            <li class="page-item">
-                <a class="page-link" href="?page=<?= $current_page + 1 ?>" aria-label="Next">
-                    <span aria-hidden="true">&raquo;</span>
-                </a>
-            </li>
-            <li class="page-item">
-                <a class="page-link" href="?page=<?= $total_pages ?>" aria-label="Last">
-                    <span aria-hidden="true">&raquo;&raquo;</span>
-                </a>
-            </li>
-        <?php else: ?>
-            <li class="page-item disabled">
-                <a class="page-link" href="#" aria-label="Next">
-                    <span aria-hidden="true">&raquo;</span>
-                </a>
-            </li>
-            <li class="page-item disabled">
-                <a class="page-link" href="#" aria-label="Last">
-                    <span aria-hidden="true">&raquo;&raquo;</span>
-                </a>
-            </li>
-        <?php endif; ?>
-    </ul>
-</nav>
-
             </div>
         </main>
         <footer class="app-footer">

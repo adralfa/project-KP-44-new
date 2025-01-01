@@ -166,18 +166,6 @@ $total_pages = ceil($total_data / $limit);
                 <div class="col-2">
                     <button class="btn btn-primary" type="button">Tambah Mahasiswa</button>
                 </div>
-            <!-- <div class="col-7 text-end">
-                            <p>Cari NIM : </p>
-                        </div>
-                        <div class="col-5">
-    <form method="get" action="">
-        <div class="input-group mb-3">
-            <input type="text" class="form-control" name="nim" value="<?php echo htmlspecialchars($nimSearch); ?>" placeholder="Cari..." aria-label="Cari NIM">
-            <div class="input-group-append">
-                <button class="btn btn-primary" type="submit" id="button-addon2">Cari</button>
-            </div>
-        </div>
-    </form> -->
 </div>
             <table class="table table-bordered mt-3">
                 <thead>

@@ -14,7 +14,12 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] != 'admin') {
 include '../../koneksi.php';
 
 // Query untuk mengambil data dosen dari database
-$sql = "SELECT nik, nama_dosen FROM dosen"; // Sesuaikan nama tabel dan kolom jika perlu
+$sql = "
+    SELECT d.nik, d.nama_dosen, GROUP_CONCAT(DISTINCT kc.no_kelompok ORDER BY kc.no_kelompok ASC SEPARATOR ', ') AS kelompok
+    FROM dosen d
+    JOIN kpconnection kc ON d.nik = kc.nik
+    GROUP BY d.nik, d.nama_dosen
+";  
 $result = $conn->query($sql);
 
 ?>
@@ -101,7 +106,7 @@ $result = $conn->query($sql);
                                     echo "<tr class='align-middle'>";
                                     echo "<td>" . $row['nik'] . "</td>";
                                     echo "<td>" . $row['nama_dosen'] . "</td>";
-                                    echo "<td>-</td>"; // Kolom kelompok kosong untuk sementara
+                                    echo "<td>" . $row['kelompok'] . "</td>"; // Kolom kelompok kosong untuk sementara
                                     echo "<td><button class='btn btn-primary' type='button'>Ubah</button>
                                           <button class='btn btn-danger' type='button'>Hapus</button></td>";
                                     echo "</tr>";

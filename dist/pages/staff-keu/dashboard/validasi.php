@@ -47,12 +47,12 @@ $result = $stmt->get_result();
                         <li class="nav-item dropdown user-menu"> 
                             <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"> 
                                 <img src="/dist/assets/img/user2-160x160.jpg" class="user-image rounded-circle shadow" alt="User Image"> 
-                                <span class="d-none d-md-inline">Alexander Pierce</span> 
+                                <span class="d-none d-md-inline"><?php echo htmlspecialchars($_SESSION['user_name']);?></span> 
                             </a>
                             <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
                                 <li class="user-header text-bg-primary"> 
                                     <img src="/dist/assets/img/user2-160x160.jpg" class="rounded-circle shadow" alt="User Image">
-                                    <p>Alexander Pierce - Web Developer</p>
+                                    <p><?php echo htmlspecialchars($_SESSION['user_name']);?></p>
                                 </li>
                                 <li class="user-footer"> <a href="#" class="btn btn-default btn-flat">Profile</a> <a href="#" class="btn btn-default btn-flat float-end">Sign out</a> </li>
                             </ul>
@@ -101,11 +101,12 @@ $result = $stmt->get_result();
                     <table class="table table-bordered mt-3">
                         <thead class="text-center">
                             <tr>
-                                <th width="18%">NIM</th>
+                                <th width="15%">NIM</th>
                                 <th width="30%">Nama Mahasiswa</th>
-                                <th width="17%">Kelas</th>
-                                <th width="18%">Link File</th>
-                                <th width="17%">Status Validasi</th>
+                                <th width="10%">Kelas</th>
+                                <th width="15%">No Telp</th>
+                                <th width="15%">Link File</th>
+                                <th width="15%">Status Validasi</th>
                             </tr>
                         </thead>
                         <tbody class="text-center">
@@ -121,6 +122,7 @@ $result = $stmt->get_result();
                                     <td><?php echo htmlspecialchars($row['nim']); ?></td>
                                     <td class="text-start"><?php echo htmlspecialchars($row['nama']); ?></td>
                                     <td><?php echo htmlspecialchars($kelas); ?></td>
+                                    <td><?php echo htmlspecialchars($row['telp']); ?></td>
                                     <td>
                                         <?php if ($row['file_upload']): ?>
                                             <a href="../../../assets/uploads/bukti-pembayaran/<?php echo htmlspecialchars($row['file_upload']); ?>" target="_blank">Lihat File</a>
