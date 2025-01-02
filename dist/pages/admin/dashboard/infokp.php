@@ -34,7 +34,14 @@ $resultDosen = $conn->query("SELECT COUNT(*) AS total_dosen FROM dosen");
 $totalDosen = $resultDosen->fetch_assoc()['total_dosen'];
 
 // Hitung jumlah mitra
-$resultMitra = $conn->query("SELECT COUNT(*) AS total_mitra FROM mitra");
+// $resultMitra = $conn->query("SELECT COUNT(*) AS total_mitra FROM mitra");
+$resultMitra = $conn->query("
+    SELECT COUNT(DISTINCT m.id_mitra) AS total_mitra
+    FROM kpconnection kc
+    INNER JOIN kelompok k ON kc.no_kelompok = k.no_kelompok
+    INNER JOIN mitra m ON kc.id_mitra = m.id_mitra
+    WHERE kc.no_kelompok IS NOT NULL
+");
 $totalMitra = $resultMitra->fetch_assoc()['total_mitra'];
 
 // Tutup koneksi
@@ -234,7 +241,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <div class="inner">
                                     <h3><?php echo $totalMitra; ?></h3>
                                     <p>Mitra yang Bekerjasama</p>
-                                </div><a href="#" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+                                </div><a href="mitra.php" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
                                     More info <i class="bi bi-link-45deg"></i> </a>
                             </div> <!--end::Small Box Widget 4-->
                         </div> <!--end::Col-->
