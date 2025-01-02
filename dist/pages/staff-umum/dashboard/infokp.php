@@ -14,6 +14,33 @@ $imageFile = $uploadDir . "jadwal_kp.jpg";
 // Cek keberadaan file
 $imageExists = file_exists($imageFile);
 
+if (isset($_POST['uploadTemplateDOCX'])) {
+    $uploadDir = "../../../assets/uploads/";
+    $allowedFileType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    $statusMessageDOCX = "";
+    $alertClassDOCX = "alert-danger";
+
+    if (isset($_FILES['templateSuratDOCX']) && $_FILES['templateSuratDOCX']['error'] === UPLOAD_ERR_OK) {
+        $fileTmpPath = $_FILES['templateSuratDOCX']['tmp_name'];
+        $fileName = $_FILES['templateSuratDOCX']['name'];
+        $fileType = $_FILES['templateSuratDOCX']['type'];
+
+        if ($fileType === $allowedFileType) {
+            $destPath = $uploadDir . "template_surat.docx";
+            if (move_uploaded_file($fileTmpPath, $destPath)) {
+                $statusMessageDOCX = "File berhasil diunggah.";
+                $alertClassDOCX = "alert-success";
+            } else {
+                $statusMessageDOCX = "Terjadi kesalahan saat mengunggah file.";
+            }
+        } else {
+            $statusMessageDOCX = "Format file tidak valid. Hanya file DOCX yang diperbolehkan.";
+        }
+    } else {
+        $statusMessageDOCX = "Harap pilih file sebelum mengunggah.";
+    }
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -65,13 +92,13 @@ $imageExists = file_exists($imageFile);
                 <div class="sidebar-wrapper">
                     <nav class="mt-2"> <!--begin::Sidebar Menu-->
                         <ul class="nav sidebar-menu flex-column" role="menu">
-                            <li class="nav-item"> <a href="infokp.php" class="nav-link active"> <i class="nav-icon bi bi-info-circle-fill"></i>
+                            <li class="nav-item"> <a href="infokp.php" class="nav-link"> <i class="nav-icon bi bi-info-circle-fill"></i>
                                 <p>Informasi KP</p>
                             </a> </li>
                             <li class="nav-item"> <a href="permintaan-surat.html" class="nav-link"> <i class="nav-icon bi bi-envelope-arrow-up-fill"></i>
                                 <p>Data Permintaan Surat</p>
                             </a> </li>
-                            <li class="nav-item"> <a href="surat-keluar.html" class="nav-link"> <i class="nav-icon bi bi-envelope-arrow-down-fill"></i>
+                            <li class="nav-item"> <a href="surat-keluar.php" class="nav-link"> <i class="nav-icon bi bi-envelope-arrow-down-fill"></i>
                                     <p>Data Surat Keluar</p>
                                 </a> </li>
                             <li class="nav-item"> <a href="../../logout.php" class="nav-link"> <i class="nav-icon bi bi-box-arrow-left"></i>
@@ -111,6 +138,31 @@ $imageExists = file_exists($imageFile);
                             </div>
                         </div>
                     </div>
+                    <div class="row px-5 py-3">
+                        <?php if (!empty($statusMessageDOCX)): ?>
+                            <div class="alert <?php echo $alertClassDOCX; ?> alert-dismissible fade show alert-fixed" role="alert" id="alertDOCX">
+                                <?php echo $statusMessageDOCX; ?>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                            <script>
+                                setTimeout(function() {
+                                    document.getElementById('alertDOCX').classList.remove('show');
+                                }, 3000);
+                                </script>
+    <?php endif; ?>
+    <form action="" method="post" enctype="multipart/form-data">
+        <label for="templateSuratDOCX" class="form-label fw-bold">Upload Template Surat Permohonan Penelitian (DOCX)</label>
+        <div class="row">
+            <div class="col-9">
+        <input class="form-control" type="file" id="templateSuratDOCX" name="templateSuratDOCX" accept="application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+    </div>
+    <div class="col-3">
+        <button type="submit" name="uploadTemplateDOCX" class="btn btn-primary">Submit</button>
+    </div>
+            </div>
+    </form>
+</div>
+
                 </div>
             </main>
             <footer class="app-footer"> <!--begin::To the end-->

@@ -424,13 +424,7 @@ $result = $conn->query($query);
                         echo $mahasiswa_counter2;
                     ?>
                         </p>
-                    <?php 
-                if (isset($_SESSION['success'])): 
-                    header('Location: kelompok.php');
-                    ?>
                     
-                    <div class="alert alert-success"><?= $_SESSION['success']; unset($_SESSION['success']); ?></div>
-                <?php endif; ?>
                 <form method="POST">
                     <input type="submit" class="btn btn-primary" name="generate_team" value="BUAT KELOMPOK BARU">
                 </form>

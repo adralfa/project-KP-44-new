@@ -3,7 +3,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
     error_reporting(0);
 }
-if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] != 'staff_keu') {
+if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] != 'staff_umum') {
     header("Location: ../../index.php");
     exit;
 }
@@ -12,17 +12,17 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] != 'staff_keu') {
 include '../../koneksi.php';
 
 // Variabel pencarian
-$nimSearch = "";
-if (isset($_GET['nim'])) {
-    $nimSearch = $_GET['nim'];
+$kelompokSearch = "";
+if (isset($_GET['no_kelompok'])) {
+    $kelompokSearch = $_GET['no_kelompok'];
 }
 
-// Query untuk mengambil data berdasarkan pencarian NIM (jika ada)
-$sql = "SELECT * FROM mahasiswa WHERE nim LIKE ?";
+// Query untuk mengambil data berdasarkan pencarian no_kelompok (jika ada) dan mengurutkan berdasarkan tanggal
+$sql = "SELECT no_surat, tanggal, no_kelompok, file_name FROM surat WHERE no_kelompok LIKE ? ORDER BY tanggal DESC";
 
 // Menyiapkan query dan menghindari SQL Injection
 $stmt = $conn->prepare($sql);
-$searchTerm = "%$nimSearch%";
+$searchTerm = "%$kelompokSearch%";
 $stmt->bind_param("s", $searchTerm);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -74,8 +74,11 @@ $result = $stmt->get_result();
                         <li class="nav-item"> <a href="infokp.php" class="nav-link"> <i class="nav-icon bi bi-info-circle-fill"></i>
                                 <p>Informasi KP</p>
                             </a> </li>
-                            <li class="nav-item"> <a href="validasi.php" class="nav-link"> <i class="nav-icon bi bi-receipt-cutoff"></i>
-                                    <p>Data Validasi KP</p>
+                            <li class="nav-item"> <a href="permintaan-surat.html" class="nav-link"> <i class="nav-icon bi bi-envelope-arrow-up-fill"></i>
+                                <p>Data Permintaan Surat</p>
+                            </a> </li>
+                            <li class="nav-item"> <a href="surat-keluar.php" class="nav-link"> <i class="nav-icon bi bi-envelope-arrow-down-fill"></i>
+                                    <p>Data Surat Keluar</p>
                                 </a> </li>
                             <li class="nav-item"> <a href="../../logout.php" class="nav-link"> <i class="nav-icon bi bi-box-arrow-left"></i>
                                     <p>Logout</p>
@@ -87,71 +90,53 @@ $result = $stmt->get_result();
             <!-- App Main -->
             <main class="app-main">
                 <div class="container-fluid px-5 py-3">
-                    <h1>Data Validasi Keuangan KP</h1>
+                    <h1>Data Surat Keluar</h1>
                     <div class="row d-flex align-items-center mt-5">
-                        <div class="col-7 d-flex align-items-center justify-content-end">
-                            <p>Cari NIM : </p>
+            <div class="col-7 d-flex align-items-center justify-content-end">
+                <p>Cari No Kelompok: </p>
+            </div>
+            <div class="col-5">
+                <form method="get" action="">
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" name="no_kelompok" value="<?php echo htmlspecialchars($kelompokSearch); ?>" placeholder="Cari..." aria-label="Cari No Kelompok">
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" type="submit" id="button-addon2">Cari</button>
                         </div>
-                        <div class="col-5">
-    <form method="get" action="">
-        <div class="input-group mb-3">
-            <input type="text" class="form-control" name="nim" value="<?php echo htmlspecialchars($nimSearch); ?>" placeholder="Cari..." aria-label="Cari NIM">
-            <div class="input-group-append">
-                <button class="btn btn-primary" type="submit" id="button-addon2">Cari</button>
+                    </div>
+                </form>
             </div>
         </div>
-    </form>
-</div>
-
-                    </div>
                     <!-- Table Data -->
                     <table class="table table-bordered mt-3">
-                        <thead class="text-center">
-                            <tr>
-                                <th width="15%">NIM</th>
-                                <th width="30%">Nama Mahasiswa</th>
-                                <th width="10%">Kelas</th>
-                                <th width="15%">No Telp</th>
-                                <th width="15%">Link File</th>
-                                <th width="15%">Status Validasi</th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-center">
-                            <?php while ($row = $result->fetch_assoc()): ?>
-                                <?php
-                                    // Gabungkan prodi, angkatan, dan kelas untuk kolom Kelas
-                                    $kelas = $row['prodi'] . ' ' . $row['angkatan'] . ' ' . $row['kelas'];
-                                    // Tentukan status validasi
-                                    // $statusValidasi = $row['status_validasi'] == 1 ? 'Valid' : 'Tidak Valid';
-                                ?>
-                                
-                                <tr>
-                                    <td><?php echo htmlspecialchars($row['nim']); ?></td>
-                                    <td class="text-start"><?php echo htmlspecialchars($row['nama']); ?></td>
-                                    <td><?php echo htmlspecialchars($kelas); ?></td>
-                                    <td><?php echo htmlspecialchars($row['telp']); ?></td>
-                                    <td>
-                                        <?php if ($row['file_upload']): ?>
-                                            <a href="../../../assets/uploads/bukti-pembayaran/<?php echo htmlspecialchars($row['file_upload']); ?>" target="_blank">Lihat File</a>
-                                        <?php else: ?>
-                                            <p class="text-danger">No File</p>
-                                        <?php endif; ?>
-                                    </td>
-                                    <form method="POST" action="<?= htmlspecialchars('update-status.php') . '?v=' . time(); ?>" id="form-status-<?= $row['nim'] ?>">
-    <td>
-        <input type="hidden" name="nim" value="<?= htmlspecialchars($row['nim']) ?>">
-        <select name="status_validasi" class="form-select" onchange="submitForm('form-status-<?= $row['nim'] ?>')">
-            <option value="1" <?= $row['status_validasi'] == 1 ? 'selected' : '' ?>>Valid</option>
-            <option value="0" <?= $row['status_validasi'] == 0 ? 'selected' : '' ?>>Tidak Valid</option>
-        </select>
-    </td>
-</form>
-
-                                </tr>
-                                
-                            <?php endwhile; ?>
-                        </tbody>
-                    </table>
+            <thead class="text-center">
+                <tr>
+                    <th width="15%">No</th>
+                    <th width="20%">No Surat</th>
+                    <th width="25%">Tanggal</th>
+                    <th width="20%">No Kelompok</th>
+                    <th width="20%">File</th>
+                </tr>
+            </thead>
+            <tbody class="text-center">
+    <?php 
+    $no = 1;  // Menambahkan counter untuk nomor urut
+    while ($row = $result->fetch_assoc()): ?>
+        <tr>
+            <td><?php echo $no++; ?></td>  <!-- Menampilkan nomor urut -->
+            <td><?php echo htmlspecialchars($row['no_surat']); ?></td>
+            <td><?php echo htmlspecialchars($row['tanggal']); ?></td>
+            <td><?php echo htmlspecialchars($row['no_kelompok']); ?></td>
+            <td>
+                <?php if ($row['file_name']): ?>
+                    <a href="../../../assets/uploads/surat_output/<?php echo htmlspecialchars($row['file_name']); ?>" target="_blank">Lihat File</a>
+                <?php else: ?>
+                    <p class="text-danger">No File</p>
+                <?php endif; ?>
+            </td>
+        </tr>
+    <?php endwhile; ?>
+</tbody>
+        </table>
                     <ul class="pagination pagination-sm m-0 float-end">
                         <li class="page-item"> <a class="page-link" href="#">«</a> </li>
                         <li class="page-item"> <a class="page-link" href="#">1</a> </li>

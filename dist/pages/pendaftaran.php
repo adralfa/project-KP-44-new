@@ -1,31 +1,58 @@
+<?php
+session_start();
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <!-- <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css"> -->
     <link rel="stylesheet" href="/dist/css/adminlte.css" id="bootstrap-css">
     <link rel="stylesheet" href="/dist/css/style.css">
-    <!-- <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> -->
-    
+    <style>
+        alert-fixed {
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1050;
+            margin: 10px 0;
+            width: auto;
+            max-width: 80%;
+        }
+    </style>
 </head>
 <body>
-    
-<!------ Include the above in your HEAD tag ---------->
-
-<div class="container-fluid register">
-    <div class="row d-flex align-items-center">
-        <div class="col-md-3 register-left">
-            <img src="/dist/assets/img/logo-fkom-putih.png" alt="Logo"/>
-        </div>
-        <div class="col-md-9 container-fluid register-right">
-            <div class="tab-content" id="myTabContent">
-                <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-                    <form action="simpan_data.php" method="post">
-                    <h3 class="register-heading fw-bold">PENDAFTARAN KERJA PRAKTEK</h3>
-                    <div class="row register-form">
+    <div class="container-fluid register">
+        <div class="row d-flex align-items-center">
+        <?php if (isset($_SESSION['status']) && isset($_SESSION['message'])): ?>
+    <div class="alert alert-<?php echo $_SESSION['status']; ?> alert-dismissible fade show" role="alert">
+        <?php echo $_SESSION['message']; ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <script>
+        // Otomatis sembunyikan alert setelah 5 detik
+        setTimeout(() => {
+    const alertElement = document.querySelector('.alert');
+    if (alertElement) {
+        alertElement.remove();
+    }
+}, 3000);
+    </script>
+    <?php unset($_SESSION['status']); unset($_SESSION['message']); ?>
+    <?php endif; ?>
+            <div class="col-md-3 register-left">
+                <img src="/dist/assets/img/logo-fkom-putih.png" alt="Logo"/>
+            </div>
+            <div class="col-md-9 container-fluid register-right">
+                <div class="tab-content" id="myTabContent">
+                    <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                        <form action="simpan_data.php" method="post">
+                            <h3 class="register-heading fw-bold">PENDAFTARAN KERJA PRAKTEK</h3>
+                            <div class="row register-form">
                             <div class="row mb-4">
                                 <div class="col-md-6">
                                     <label for="emailform" class="form-label">Email</label>
@@ -128,10 +155,13 @@
                                   </div>
                             </div>
                     </div>
-                    </form>
+                        </form>
+                    </div>
                 </div>
-
             </div>
+        </div>
+    </div>
+
     <script src="/dist/js/adminlte.js"></script>
     <script src="/dist/js/jquery.js"></script>
 </body>

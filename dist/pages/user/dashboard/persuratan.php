@@ -8,6 +8,11 @@ if (session_status() === PHP_SESSION_NONE) {
 require '../../../../vendor/autoload.php';
 require '../../koneksi.php';
 
+// Cek apakah mahasiswa memiliki kelompok
+if($_SESSION['no_kelompok'] == '-') {
+    $is_no_kelompok_empty = 1;
+}
+
 // Query untuk memeriksa apakah ada anggota dengan status_validasi = 0
 $query = "
     SELECT COUNT(*) AS count
@@ -207,7 +212,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Tampilkan tautan unduh
-        header('Location: suratkemitra.php');
+        header('Location: persuratan.php');
         $alertMessage = 'Surat berhasil dibuat: <a href="$outputFile" class="btn btn-primary" download>Download Surat</a>';
         $alertType = 'success';
         exit;
@@ -287,12 +292,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <li class="nav-item"> <a href="infomhs.php" class="nav-link"> <i class="nav-icon bi bi-person-fill"></i>
                                     <p>Info Mahasiswa</p>
                                 </a> </li>
-                            <li class="nav-item"> <a href="infokelompok.php" class="nav-link"> <i class="nav-icon bi bi-people-fill"></i>
-                                    <p>Info Kelompok</p>
-                                </a> </li>
-                                <li class="nav-item"><a href="persuratan.php" 
-       class="nav-link <?php echo $is_disabled ? 'disabled' : ''; ?>" 
-       <?php echo $is_disabled ? 'tabindex="-1" aria-disabled="true"' : ''; ?>>
+                                <li class="nav-item">  <a href="infokelompok.php" 
+       class="nav-link <?php echo $is_no_kelompok_empty == 1 ? 'disabled' : ''; ?>" 
+       <?php echo $is_no_kelompok_empty == 1 ? 'tabindex="-1" aria-disabled="true"' : ''; ?>>
+        <i class="nav-icon bi bi-people-fill"></i>
+        <p>Info Kelompok</p>
+    </a> </li>
+                            <li class="nav-item"><a href="persuratan.php" 
+       class="nav-link <?php echo ($is_no_kelompok_empty == 1 || $is_disabled) ? 'disabled' : ''; ?>" 
+       <?php echo ($is_no_kelompok_empty == 1 || $is_disabled) ? 'tabindex="-1" aria-disabled="true"' : ''; ?>>
         <i class="nav-icon bi bi-envelope-fill"></i>
         <p>Persuratan</p>
     </a></li>
@@ -392,7 +400,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <td>{$counter}</td>
                                         <td>{$row['no_surat']}</td>
                                         <td>{$row['tanggal']}</td>
-                                        <td><a href='../../../../dist/assets/uploads/surat_output/{$row['file_name']}' target='_blank'>Download</a></td>
+                                        <td><a href='../../../../dist/assets/uploads/surat_output/{$row['file_name']}' target='_blank'>Buka File</a></td>
                                     </tr>";
                                     $counter++;
                                 }

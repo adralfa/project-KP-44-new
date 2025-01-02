@@ -11,6 +11,11 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] != 'mahasiswa') {
 
 include('../../koneksi.php'); // File koneksi database
 
+// Cek apakah mahasiswa memiliki kelompok
+if($_SESSION['no_kelompok'] == '-') {
+    $is_no_kelompok_empty = 1;
+}
+
 // Query untuk memeriksa apakah ada anggota dengan status_validasi = 0
 $query = "
     SELECT COUNT(*) AS count
@@ -201,12 +206,15 @@ if (isset($_POST['submit_upload'])) {
                             <li class="nav-item"> <a href="infomhs.php" class="nav-link"> <i class="nav-icon bi bi-person-fill"></i>
                                     <p>Info Mahasiswa</p>
                                 </a> </li>
-                            <li class="nav-item"> <a href="infokelompok.php" class="nav-link"> <i class="nav-icon bi bi-people-fill"></i>
-                                    <p>Info Kelompok</p>
-                                </a> </li>
+                                <li class="nav-item">  <a href="infokelompok.php" 
+       class="nav-link <?php echo $is_no_kelompok_empty == 1 ? 'disabled' : ''; ?>" 
+       <?php echo $is_no_kelompok_empty == 1 ? 'tabindex="-1" aria-disabled="true"' : ''; ?>>
+        <i class="nav-icon bi bi-people-fill"></i>
+        <p>Info Kelompok</p>
+    </a> </li>
                             <li class="nav-item"><a href="persuratan.php" 
-       class="nav-link <?php echo $is_disabled ? 'disabled' : ''; ?>" 
-       <?php echo $is_disabled ? 'tabindex="-1" aria-disabled="true"' : ''; ?>>
+       class="nav-link <?php echo ($is_no_kelompok_empty == 1 || $is_disabled) ? 'disabled' : ''; ?>" 
+       <?php echo ($is_no_kelompok_empty == 1 || $is_disabled) ? 'tabindex="-1" aria-disabled="true"' : ''; ?>>
         <i class="nav-icon bi bi-envelope-fill"></i>
         <p>Persuratan</p>
     </a></li>
