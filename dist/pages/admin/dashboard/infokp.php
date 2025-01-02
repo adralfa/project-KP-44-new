@@ -12,6 +12,34 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] != 'admin') {
     exit;
 }
 
+include '../../koneksi.php';
+
+// Hitung jumlah mahasiswa
+$resultMahasiswa = $conn->query("SELECT COUNT(*) AS total_mahasiswa FROM mahasiswa");
+$totalMahasiswa = $resultMahasiswa->fetch_assoc()['total_mahasiswa'];
+
+// Hitung jumlah kelompok yang memiliki mahasiswa melalui tabel kpconnection
+$resultKelompok = $conn->query("
+    SELECT COUNT(DISTINCT k.no_kelompok) AS total_kelompok
+    FROM kpconnection kc
+    INNER JOIN kelompok k ON kc.no_kelompok = k.no_kelompok
+    INNER JOIN mahasiswa m ON kc.nim = m.nim
+    WHERE kc.no_kelompok IS NOT NULL
+");
+$totalKelompok = $resultKelompok->fetch_assoc()['total_kelompok'];
+
+
+// Hitung jumlah dosen
+$resultDosen = $conn->query("SELECT COUNT(*) AS total_dosen FROM dosen");
+$totalDosen = $resultDosen->fetch_assoc()['total_dosen'];
+
+// Hitung jumlah mitra
+$resultMitra = $conn->query("SELECT COUNT(*) AS total_mitra FROM mitra");
+$totalMitra = $resultMitra->fetch_assoc()['total_mitra'];
+
+// Tutup koneksi
+$conn->close();
+
 // Folder tempat file akan disimpan
 $uploadDir = "../../../assets/uploads/";
 
@@ -173,13 +201,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <h3>Fakultas Ilmu Komputer 2024</h3>
                         </div>
                     </div>
-
-                    <div class="row mt-3 px-5 py-3">
-                        <h5 class="mb-3">Kerja Praktik Fakultas Ilmu Komputer Universitas Kuningan Tahun Akademik 2024/2025</h5>
-                        <p class="mb-3">Kerja Praktek (KP) adalah salah satu mata kuliah wajib dan salah satu syarat sebelum melaksanakan penyusunan tugas akhir/skripsi. Kerja Praktek di Fakultas Ilmu Komputer mempunyai bobot 2 SKS dan dilaksanakan dengan melakukan proyek penelitian pada DU/DI (Dunia Usaha/Dunia Industri) yang berbadan hukum (memiliki ijin usaha minimal CV) atau UMKM yang telah memiliki ijin usaha, dengan dibimbing oleh 1 (satu) orang Pembimbing Lapangan yang ditunjuk oleh tempat KP (DU/DI) dan 1 (satu) orang Dosen Pembimbing yang di SK-kan oleh Dekan atas usulan Ketua Program Studi, dimana pembimbing tersebut memberikan bimbingan kepada mahasiswa selama kegiatan dan memberikan nilai akhir. Hasil dari KP berupa produk perangkat lunak (aplikasi ataupun sistem informasi) maupun produk desain komunikasi visual yang nantinya dapat digunakan untuk memecahkan permasalahan pada DU/DI dalam bentuk project-team based. Serta harus disusun menjadi sebuah Laporan Kerja Praktek dan diseminarkan di hadapan penguji KP yang ditunjuk dan di SK-kan oleh Dekan. <br><br>    
-
-                        Nilai tambah dari kegiatan praktek ini bagi peserta diantaranya adalah mampu membentuk sikap mental/attitude dalam bekerja; Mampu mengidentifikasi, menganalisa dan merumuskan masalah selama berada di dunia kerja yang berdasarkan rasional tertentu yang dinilai penting dan bermanfaat ditinjau dari berbagai faktor; Mampu menganalisa, merancang dan mengembangkan sebuah perangkat lunak terapan maupun sistem informasi; Mampu melakukan tahapan metodologis dalam pembuatan produk dan karya desain komunikasi visual; Mampu mempresentasikan hasil Kerja Praktek ke dalam sebuah laporan yang tersusun secara sistematis sesuai dengan masalah yang diteliti serta mempertanggung jawabkannya.</p>
-                    </div>
+                    <div class="row mt-3 px-5 py-3"> <!--begin::Col-->
+                        <div class="col-lg-3 col-6"> <!--begin::Small Box Widget 1-->
+                            <div class="small-box text-bg-primary">
+                                <div class="inner">
+                                    <h3><?php echo $totalMahasiswa; ?></h3>
+                                    <p>Mahasiswa Peserta KP</p>
+                                </div> <a href="mahasiswa.php" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+                                    More info <i class="bi bi-link-45deg"></i> </a>
+                            </div> <!--end::Small Box Widget 1-->
+                        </div> <!--end::Col-->
+                        <div class="col-lg-3 col-6"> <!--begin::Small Box Widget 2-->
+                            <div class="small-box text-bg-success">
+                                <div class="inner">
+                                    <h3><?php echo $totalKelompok; ?></h3>
+                                    <p>Kelompok KP</p>
+                                </div> <a href="kelompok.php" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+                                    More info <i class="bi bi-link-45deg"></i> </a>
+                            </div> <!--end::Small Box Widget 2-->
+                        </div> <!--end::Col-->
+                        <div class="col-lg-3 col-6"> <!--begin::Small Box Widget 3-->
+                            <div class="small-box text-bg-warning">
+                                <div class="inner">
+                                    <h3><?php echo $totalDosen; ?></h3>
+                                    <p>Dosen Pembimbing</p>
+                                </div> <a href="dosen.php" class="small-box-footer link-dark link-underline-opacity-0 link-underline-opacity-50-hover">
+                                    More info <i class="bi bi-link-45deg"></i> </a>
+                            </div> <!--end::Small Box Widget 3-->
+                        </div> <!--end::Col-->
+                        <div class="col-lg-3 col-6"> <!--begin::Small Box Widget 4-->
+                            <div class="small-box text-bg-danger">
+                                <div class="inner">
+                                    <h3><?php echo $totalMitra; ?></h3>
+                                    <p>Mitra yang Bekerjasama</p>
+                                </div><a href="#" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+                                    More info <i class="bi bi-link-45deg"></i> </a>
+                            </div> <!--end::Small Box Widget 4-->
+                        </div> <!--end::Col-->
+                    </div> <!--end::Row--> 
 
                     <form action="" method="POST" enctype="multipart/form-data">
                         <div class="row px-5 py-3">

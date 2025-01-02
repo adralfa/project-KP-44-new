@@ -41,7 +41,7 @@ $pdfExists = file_exists($pdfFile);
                 <div class="container-fluid">
                     <div class="row px-5 py-5" style="background-color: rgb(0, 0, 58); color: white;">
                         <div class="col-lg-2 col-md-3 col-5 d-flex align-items-center">
-                            <img src="/dist/assets/img/logo-fkom-putih.png" alt="logo" width="100%">
+                            <img src="../assets/img/logo-fkom-putih.png" alt="logo" width="100%">
                         </div>
                         <div class="col-lg-10 col-md-9 col-7 d-flex align-items-center">
                             <div class="row ms-3">
