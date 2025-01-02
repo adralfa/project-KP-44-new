@@ -82,46 +82,44 @@ $total_pages = ceil($total_data / $limit);
 <body>
     <body class="layout-fixed sidebar-expand-lg bg-body-tertiary"> <!--begin::App Wrapper-->
         <div class="app-wrapper"> <!--begin::Header-->
-            <nav class="app-header navbar navbar-expand bg-body"> <!--begin::Container-->
-                <div class="container-fluid"> <!--begin::Start Navbar Links-->
-                    <h5 class="brand-text text-dark ms-2 align-middle">PENGELOLAAN DATA KERJA PRAKTEK</h5> <!--end::Brand Text-->
-                    <!-- <ul class="navbar-nav">
-                        <li class="nav-item"> <a class="nav-link" data-lte-toggle="sidebar" href="#" role="button"> <i class="bi bi-list"></i> </a> </li>
-                        <li class="nav-item d-none d-md-block"> <a href="#" class="nav-link">Home</a> </li>
-                        <li class="nav-item d-none d-md-block"> <a href="#" class="nav-link">Contact</a> </li>
-                    </ul> end::Start Navbar Links begin::End Navbar Links -->
-                    <ul class="navbar-nav ms-auto"> <!--begin::Navbar Search-->
-                        <!--begin::User Menu Dropdown-->
-                        <li class="nav-item dropdown user-menu"> <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"> <img src="/dist/assets/img/user2-160x160.jpg" class="user-image rounded-circle shadow" alt="User Image"> 
-                        <span class="d-none d-md-inline">
-                            <?php echo htmlspecialchars($_SESSION['user_name']); ?>
-                        </span> </a>
-                            <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end"> <!--begin::User Image-->
-                                <li class="user-header text-bg-primary"> <img src="/dist/assets/img/user2-160x160.jpg" class="rounded-circle shadow" alt="User Image">
+        <nav class="app-header navbar navbar-expand bg-body">
+                <div class="container-fluid">
+                    <h5 class="brand-text text-dark ms-2 align-middle">PENGELOLAAN DATA KERJA PRAKTEK</h5>
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item dropdown user-menu">
+                            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                                <img src="../../../assets/img/user2-160x160.jpg" class="user-image rounded-circle shadow" alt="User Image">
+                                <span class="d-none d-md-inline">
+                                    <?php echo htmlspecialchars($_SESSION['user_name']); ?>
+                                </span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
+                                <li class="user-header text-bg-primary">
+                                    <img src="../../../assets/img/user2-160x160.jpg" class="rounded-circle shadow" alt="User Image">
                                     <p>
-                                        <?php echo htmlspecialchars($_SESSION['user_name']); ?>
+                                        <?php echo htmlspecialchars($_SESSION['user_name']); ?> - Admin
                                         <small>Member since Nov. 2023</small>
                                     </p>
-                                </li> <!--end::User Image--> <!--begin::Menu Body-->
-                                <li class="user-body"> <!--begin::Row-->
-                                    <div class="row">
-                                        <div class="col-4 text-center"> <a href="#">Followers</a> </div>
-                                        <div class="col-4 text-center"> <a href="#">Sales</a> </div>
-                                        <div class="col-4 text-center"> <a href="#">Friends</a> </div>
-                                    </div> <!--end::Row-->
-                                </li> <!--end::Menu Body--> <!--begin::Menu Footer-->
-                                <li class="user-footer"> <a href="#" class="btn btn-default btn-flat">Profile</a> <a href="#" class="btn btn-default btn-flat float-end">Sign out</a> </li> <!--end::Menu Footer-->
+                                </li>
+                                <li class="user-footer">
+                                    <a href="#" class="btn btn-default btn-flat">Profile</a>
+                                    <a href="../../logout.php" class="btn btn-default btn-flat float-end">Sign out</a>
+                                </li>
                             </ul>
-                        </li> <!--end::User Menu Dropdown-->
-                    </ul> <!--end::End Navbar Links-->
-                </div> <!--end::Container-->
-            </nav> <!--end::Header--> <!--begin::Sidebar-->
-            <aside class="app-sidebar shadow" style="background-color: rgb(0, 0, 58); color: white;" data-bs-theme="dark"> <!--begin::Sidebar Brand-->
-                <div class="sidebar-brand bg-light"> <!--begin::Brand Link--> <a href="./home.html" class="brand-link"> <!--begin::Brand Image--> <img src="/dist/assets/img/LOGOFKOM.png" alt="AdminLTE Logo" class="brand-image opacity-75 shadow"> <!--end::Brand Image--> <!--begin::Brand Text-->  </a> <!--end::Brand Link--> </div> <!--end::Sidebar Brand--> <!--begin::Sidebar Wrapper-->
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+            <aside class="app-sidebar shadow" style="background-color: rgb(0, 0, 58); color: white;" data-bs-theme="dark">
+                <div class="sidebar-brand bg-light">
+                    <a href="infokp.php" class="brand-link">
+                        <img src="../../../assets/img/LOGOFKOM.png" alt="AdminLTE Logo" class="brand-image opacity-75 shadow">
+                    </a>
+                </div>
                 <div class="sidebar-wrapper">
-                    <nav class="mt-2"> <!--begin::Sidebar Menu-->
-                    <ul class="nav sidebar-menu flex-column" role="menu">
-                    <li class="nav-item"> <a href="infokp.php" class="nav-link"> <i class="nav-icon bi bi-info-circle-fill"></i>
+                    <nav class="mt-2">
+                        <ul class="nav sidebar-menu flex-column" role="menu">
+                            <li class="nav-item"> <a href="infokp.php" class="nav-link"> <i class="nav-icon bi bi-info-circle-fill"></i>
                                 <p>Informasi KP</p>
                             </a> </li>
                             <li class="nav-item"> <a href="mahasiswa.php" class="nav-link"> <i class="nav-icon bi bi-person-fill"></i>
@@ -144,8 +142,8 @@ $total_pages = ceil($total_data / $limit);
                                 </a> </li>
                         </ul>
                     </nav>
-                </div> <!--end::Sidebar Wrapper-->
-            </aside> <!--end::Sidebar--> <!--begin::App Main-->
+                </div>
+            </aside><!--begin::App Main-->
             <main class="app-main">
         <div class="container-fluid px-5 py-3">
             <h1>Data Mahasiswa</h1>

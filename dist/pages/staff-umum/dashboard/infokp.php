@@ -95,7 +95,7 @@ if (isset($_POST['uploadTemplateDOCX'])) {
                             <li class="nav-item"> <a href="infokp.php" class="nav-link"> <i class="nav-icon bi bi-info-circle-fill"></i>
                                 <p>Informasi KP</p>
                             </a> </li>
-                            <li class="nav-item"> <a href="permintaan-surat.html" class="nav-link"> <i class="nav-icon bi bi-envelope-arrow-up-fill"></i>
+                            <li class="nav-item"> <a href="permintaan-surat.php" class="nav-link"> <i class="nav-icon bi bi-envelope-arrow-up-fill"></i>
                                 <p>Data Permintaan Surat</p>
                             </a> </li>
                             <li class="nav-item"> <a href="surat-keluar.php" class="nav-link"> <i class="nav-icon bi bi-envelope-arrow-down-fill"></i>

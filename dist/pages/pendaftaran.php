@@ -10,8 +10,8 @@ error_reporting(E_ALL);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="/dist/css/adminlte.css" id="bootstrap-css">
-    <link rel="stylesheet" href="/dist/css/style.css">
+    <link rel="stylesheet" href="../css/adminlte.css" id="bootstrap-css">
+    <link rel="stylesheet" href="../css/style.css">
     <style>
         alert-fixed {
             position: fixed;
@@ -45,7 +45,7 @@ error_reporting(E_ALL);
     <?php unset($_SESSION['status']); unset($_SESSION['message']); ?>
     <?php endif; ?>
             <div class="col-md-3 register-left">
-                <img src="/dist/assets/img/logo-fkom-putih.png" alt="Logo"/>
+                <img src="../assets/img/logo-fkom-putih.png" alt="Logo"/>
             </div>
             <div class="col-md-9 container-fluid register-right">
                 <div class="tab-content" id="myTabContent">
@@ -162,7 +162,7 @@ error_reporting(E_ALL);
         </div>
     </div>
 
-    <script src="/dist/js/adminlte.js"></script>
-    <script src="/dist/js/jquery.js"></script>
+    <script src="../js/adminlte.js"></script>
+    <script src="../js/jquery.js"></script>
 </body>
 </html>

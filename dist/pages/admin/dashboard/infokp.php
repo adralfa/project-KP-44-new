@@ -141,14 +141,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <ul class="navbar-nav ms-auto">
                         <li class="nav-item dropdown user-menu">
                             <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-                                <img src="/dist/assets/img/user2-160x160.jpg" class="user-image rounded-circle shadow" alt="User Image">
+                                <img src="../../../assets/img/user2-160x160.jpg" class="user-image rounded-circle shadow" alt="User Image">
                                 <span class="d-none d-md-inline">
                                     <?php echo htmlspecialchars($_SESSION['user_name']); ?>
                                 </span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
                                 <li class="user-header text-bg-primary">
-                                    <img src="/dist/assets/img/user2-160x160.jpg" class="rounded-circle shadow" alt="User Image">
+                                    <img src="../../../assets/img/user2-160x160.jpg" class="rounded-circle shadow" alt="User Image">
                                     <p>
                                         <?php echo htmlspecialchars($_SESSION['user_name']); ?> - Admin
                                         <small>Member since Nov. 2023</small>
@@ -165,8 +165,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </nav>
             <aside class="app-sidebar shadow" style="background-color: rgb(0, 0, 58); color: white;" data-bs-theme="dark">
                 <div class="sidebar-brand bg-light">
-                    <a href="./home.html" class="brand-link">
-                        <img src="/dist/assets/img/LOGOFKOM.png" alt="AdminLTE Logo" class="brand-image opacity-75 shadow">
+                    <a href="infokp.php" class="brand-link">
+                        <img src="../../../assets/img/LOGOFKOM.png" alt="AdminLTE Logo" class="brand-image opacity-75 shadow">
                     </a>
                 </div>
                 <div class="sidebar-wrapper">
@@ -201,7 +201,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="container-fluid">
                     <div class="row px-5 py-3" style="background-color: rgb(0, 0, 58); color: white;">
                         <div class="col-md-2">
-                            <img src="/dist/assets/img/logo-fkom-putih.png" alt="logo" width="100%">
+                            <img src="../../../assets/img/logo-fkom-putih.png" alt="logo" width="100%">
                         </div>
                         <div class="col-md-10">
                             <h1>KERJA PRAKTEK</h1>

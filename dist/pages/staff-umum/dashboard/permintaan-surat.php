@@ -18,7 +18,7 @@ if (isset($_GET['no_kelompok'])) {
 }
 
 // Query untuk mengambil data berdasarkan pencarian no_kelompok (jika ada) dan mengurutkan berdasarkan tanggal
-$sql = "SELECT no_surat, tanggal, no_kelompok, file_name FROM surat WHERE no_kelompok LIKE ? ORDER BY tanggal DESC";
+$sql = "SELECT id, no_surat, tanggal, no_kelompok, file_name, status_cetak FROM surat WHERE no_kelompok LIKE ? && status_cetak = 0 ORDER BY tanggal DESC";
 
 // Menyiapkan query dan menghindari SQL Injection
 $stmt = $conn->prepare($sql);
@@ -90,53 +90,65 @@ $result = $stmt->get_result();
             <!-- App Main -->
             <main class="app-main">
                 <div class="container-fluid px-5 py-3">
-                    <h1>Data Surat Keluar</h1>
-                    <div class="row d-flex align-items-center mt-5">
-            <div class="col-7 d-flex align-items-center justify-content-end">
-                <p>Cari No Kelompok: </p>
-            </div>
-            <div class="col-5">
-                <form method="get" action="">
-                    <div class="input-group mb-3">
-                        <input type="text" class="form-control" name="no_kelompok" value="<?php echo htmlspecialchars($kelompokSearch); ?>" placeholder="Cari..." aria-label="Cari No Kelompok">
-                        <div class="input-group-append">
+                    <h1>Data Permintaan Pembuatan Surat Penelitian</h1>
+                    <div class="row mt-5">
+            <div class="col-4">
+                <a href="ekspor_csv.php" class="btn btn-success mb-3">Ekspor Data</a>
+
+                </div>
+                <div class="col-8">
+                    <div class="row">
+                        <form method="get" action="">
+                            <div class="input-group mb-3">
+                                    <p class="me-3">Cari No Kelompok: </p>
+                                <input type="text" class="form-control" name="no_kelompok" value="<?php echo htmlspecialchars($kelompokSearch); ?>" placeholder="Cari..." aria-label="Cari No Kelompok">
+                                <div class="input-group-append">
                             <button class="btn btn-primary" type="submit" id="button-addon2">Cari</button>
                         </div>
                     </div>
                 </form>
+                </div>
             </div>
         </div>
                     <!-- Table Data -->
                     <table class="table table-bordered mt-3">
-            <thead class="text-center">
-                <tr>
-                    <th width="15%">No</th>
-                    <th width="20%">No Surat</th>
-                    <th width="25%">Tanggal</th>
-                    <th width="20%">No Kelompok</th>
-                    <th width="20%">File</th>
-                </tr>
-            </thead>
-            <tbody class="text-center">
-    <?php 
-    $no = 1;  // Menambahkan counter untuk nomor urut
-    while ($row = $result->fetch_assoc()): ?>
-        <tr>
-            <td><?php echo $no++; ?></td>  <!-- Menampilkan nomor urut -->
-            <td><?php echo htmlspecialchars($row['no_surat']); ?></td>
-            <td><?php echo htmlspecialchars($row['tanggal']); ?></td>
-            <td><?php echo htmlspecialchars($row['no_kelompok']); ?></td>
-            <td>
-                <?php if ($row['file_name']): ?>
-                    <a href="../../../assets/uploads/surat_output/<?php echo htmlspecialchars($row['file_name']); ?>" target="_blank">Lihat File</a>
-                <?php else: ?>
-                    <p class="text-danger">No File</p>
-                <?php endif; ?>
-            </td>
-        </tr>
-    <?php endwhile; ?>
-</tbody>
-        </table>
+                    <thead class="text-center">
+                        <tr>
+                            <th width="15%">No</th>
+                            <th width="20%">No Surat</th>
+                            <th width="25%">Tanggal</th>
+                            <th width="20%">No Kelompok</th>
+                            <th width="20%">File</th>
+                            <th width="20%">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center">
+                        <?php 
+                        $no = 1;  // Menambahkan counter untuk nomor urut
+                        while ($row = $result->fetch_assoc()): ?>
+                            <tr>
+                                <td><?php echo $no++; ?></td>  <!-- Menampilkan nomor urut -->
+                                <td><?php echo htmlspecialchars($row['no_surat']); ?></td>
+                                <td><?php echo htmlspecialchars($row['tanggal']); ?></td>
+                                <td><?php echo htmlspecialchars($row['no_kelompok']); ?></td>
+                                <td>
+                                    <?php if ($row['file_name']): ?>
+                                        <a href="../../../assets/uploads/surat_output/<?php echo htmlspecialchars($row['file_name']); ?>" target="_blank">Lihat File</a>
+                                    <?php else: ?>
+                                        <p class="text-danger">No File</p>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php if ($row['status_cetak'] == 0): ?>
+                                        <a href="cetak_surat.php?id=<?php echo $row['id']; ?>" class="btn btn-primary">Cetak</a>
+                                    <?php else: ?>
+                                        <p class="text-success">Sudah Dicetak</p>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endwhile; ?>
+                    </tbody>
+                </table>
                     <ul class="pagination pagination-sm m-0 float-end">
                         <li class="page-item"> <a class="page-link" href="#">«</a> </li>
                         <li class="page-item"> <a class="page-link" href="#">1</a> </li>
