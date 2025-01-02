@@ -11,6 +11,39 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] != 'mahasiswa') {
 
 include('../../koneksi.php'); // File koneksi database
 
+// Query untuk memeriksa apakah ada anggota dengan status_validasi = 0
+$query = "
+    SELECT COUNT(*) AS count
+    FROM kpconnection kc
+    INNER JOIN mahasiswa m ON kc.nim = m.nim
+    INNER JOIN kelompok k ON kc.no_kelompok = k.no_kelompok
+    WHERE k.no_kelompok = ? AND m.status_validasi = 0
+";
+
+$stmt = $conn->prepare($query);
+
+if ($stmt) {
+    // Bind parameter (asumsikan no_kelompok adalah integer)
+    $stmt->bind_param("i", $_SESSION['no_kelompok']);
+    
+    // Jalankan statement
+    $stmt->execute();
+
+    // Ambil hasilnya
+    $result = $stmt->get_result();
+
+    // Fetch sebagai array asosiatif
+    $data = $result->fetch_assoc();
+
+    // Akses data dengan key 'count'
+    $is_disabled = $data['count'] > 0;
+
+    // Tutup statement
+    $stmt->close();
+} else {
+    die("Query failed: " . $conn->error);
+}
+
 // Ambil data mahasiswa berdasarkan sesi
 $user_nim = $_SESSION['user_nim']; // NIM mahasiswa dari sesi
 $query = "SELECT * FROM mahasiswa WHERE nim = '$user_nim'";
@@ -27,13 +60,17 @@ $status_val = $mahasiswa['status_validasi'] == 1 ? "Valid" : "Belum Valid";
 // Proses pembaruan data
 if (isset($_POST['submit_data'])) {
     $nama = $conn->real_escape_string($_POST['nama']);
+    $jk = $conn->real_escape_string($_POST['jk']);
+    $telp = $conn->real_escape_string($_POST['telp']);
     $prodi = $conn->real_escape_string($_POST['prodi']);
     $angkatan = $conn->real_escape_string($_POST['angkatan']);
     $kelas = $conn->real_escape_string($_POST['kelas']);
     $mbkm = $conn->real_escape_string($_POST['mbkm']);
 
     $updateQuery = "UPDATE mahasiswa SET 
-                        nama = '$nama', 
+                        nama = '$nama',
+                        jk = '$jk',
+                        telp = '$telp', 
                         prodi = '$prodi', 
                         angkatan = '$angkatan', 
                         kelas = '$kelas', 
@@ -102,6 +139,8 @@ if (isset($_POST['submit_upload'])) {
     <title>Document</title>
     <link rel="stylesheet" href="../../../css/adminlte.min.css" crossorigin="anonymous"/>
     <script src="../../../js/adminlte.min.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
     <style>
         .alert-fixed {
             position: fixed;
@@ -113,6 +152,11 @@ if (isset($_POST['submit_upload'])) {
             width: auto;
             max-width: 80%;
         }
+        .nav-link.disabled {
+    pointer-events: none; /* Mencegah klik */
+    color: #6c757d; /* Warna abu-abu untuk tampilan disable */
+    cursor: not-allowed; /* Ubah kursor menjadi tanda larangan */
+}
     </style>
 </head>
 <body>
@@ -140,7 +184,7 @@ if (isset($_POST['submit_upload'])) {
                         <li class="nav-item dropdown user-menu">
                             <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
                                 <img src="/dist/assets/img/user2-160x160.jpg" class="user-image rounded-circle shadow" alt="User Image">
-                                <span class="d-none d-md-inline">Alexander Pierce</span>
+                                <span class="d-none d-md-inline"><?php echo htmlspecialchars($_SESSION['user_name']);?></span>
                             </a>
                         </li>
                     </ul>
@@ -151,19 +195,22 @@ if (isset($_POST['submit_upload'])) {
                 <div class="sidebar-wrapper">
                     <nav class="mt-2"> <!--begin::Sidebar Menu-->
                         <ul class="nav sidebar-menu flex-column" role="menu">
-                            <li class="nav-item"> <a href="infokp.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                            <li class="nav-item"> <a href="infokp.php" class="nav-link"><i class="nav-icon bi bi-info-circle-fill"></i>
                                 <p>Informasi KP</p>
                             </a> </li>
-                            <li class="nav-item"> <a href="infomhs.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                            <li class="nav-item"> <a href="infomhs.php" class="nav-link"> <i class="nav-icon bi bi-person-fill"></i>
                                     <p>Info Mahasiswa</p>
                                 </a> </li>
-                            <li class="nav-item"> <a href="infokelompok.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                            <li class="nav-item"> <a href="infokelompok.php" class="nav-link"> <i class="nav-icon bi bi-people-fill"></i>
                                     <p>Info Kelompok</p>
                                 </a> </li>
-                            <li class="nav-item"> <a href="suratkemitra.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
-                                    <p>Surat ke Mitra</p>
-                                </a> </li>
-                            <li class="nav-item"> <a href="../../logout.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                            <li class="nav-item"><a href="persuratan.php" 
+       class="nav-link <?php echo $is_disabled ? 'disabled' : ''; ?>" 
+       <?php echo $is_disabled ? 'tabindex="-1" aria-disabled="true"' : ''; ?>>
+        <i class="nav-icon bi bi-envelope-fill"></i>
+        <p>Persuratan</p>
+    </a></li>
+                            <li class="nav-item"> <a href="../../logout.php" class="nav-link"> <i class="nav-icon bi bi-box-arrow-left"></i>
                                     <p>Logout</p>
                                 </a> </li>
                         </ul>
@@ -195,14 +242,19 @@ if (isset($_POST['submit_upload'])) {
                                 <input type="text" name="nama" class="form-control" id="nama" value="<?= htmlspecialchars($mahasiswa['nama']) ?>" required>
                             </div>
                         </div>
-
                         <div class="row mb-3">
                             <label for="jk" class="col-sm-2 col-form-label">Jenis Kelamin</label>
                             <div class="col-sm-10">
-                                <select name="jk" id="jk" class="form-select" disabled>
+                                <select name="jk" id="jk" class="form-select">
                                     <option value="L" <?= $mahasiswa['jk'] === 'L' ? 'selected' : '' ?>>Laki-Laki</option>
                                     <option value="P" <?= $mahasiswa['jk'] === 'P' ? 'selected' : '' ?>>Perempuan</option>
                                 </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label for="telp" class="col-sm-2 col-form-label">Telp</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="telp" id="telp" value="<?= htmlspecialchars($mahasiswa['telp']) ?>">
                             </div>
                         </div>
                         <div class="row mb-3">

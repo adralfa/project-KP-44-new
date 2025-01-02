@@ -77,6 +77,7 @@ $total_pages = ceil($total_data / $limit);
     <title>Document</title>
     <link rel="stylesheet" href="../../../css/adminlte.min.css" crossorigin="anonymous"/>
     <script src="../../../js/adminlte.min.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
     <body class="layout-fixed sidebar-expand-lg bg-body-tertiary"> <!--begin::App Wrapper-->
@@ -120,25 +121,25 @@ $total_pages = ceil($total_data / $limit);
                 <div class="sidebar-wrapper">
                     <nav class="mt-2"> <!--begin::Sidebar Menu-->
                     <ul class="nav sidebar-menu flex-column" role="menu">
-                            <li class="nav-item"> <a href="infokp.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                    <li class="nav-item"> <a href="infokp.php" class="nav-link"> <i class="nav-icon bi bi-info-circle-fill"></i>
                                 <p>Informasi KP</p>
                             </a> </li>
-                            <li class="nav-item"> <a href="mahasiswa.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                            <li class="nav-item"> <a href="mahasiswa.php" class="nav-link"> <i class="nav-icon bi bi-person-fill"></i>
                                     <p>Data Mahasiswa</p>
                                 </a> </li>
-                            <li class="nav-item"> <a href="kelompok.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                            <li class="nav-item"> <a href="kelompok.php" class="nav-link"> <i class="nav-icon bi bi-people-fill"></i>
                                     <p>Data Kelompok</p>
                                 </a> </li>
-                            <li class="nav-item"> <a href="dosen.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                            <li class="nav-item"> <a href="dosen.php" class="nav-link"> <i class="nav-icon bi bi-mortarboard-fill"></i>
                                     <p>Data Dosen</p>
                                 </a> </li>
-                            <li class="nav-item"> <a href="mitra.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                            <li class="nav-item"> <a href="mitra.php" class="nav-link"> <i class="nav-icon bi bi-building-fill"></i>
                                     <p>Data Mitra</p>
                                 </a> </li>
                             <!-- <li class="nav-item"> <a href="staff.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
                                     <p>Data Staff</p>
                                 </a> </li> -->
-                            <li class="nav-item"> <a href="../../logout.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                            <li class="nav-item"> <a href="../../logout.php" class="nav-link"> <i class="nav-icon bi bi-box-arrow-left"></i>
                                     <p>Logout</p>
                                 </a> </li>
                         </ul>
@@ -199,21 +200,43 @@ $total_pages = ceil($total_data / $limit);
                 </tbody>
             </table>
             <ul class="pagination pagination-sm m-0 float-end">
-                <!-- Tombol Previous -->
+    <!-- Tombol Previous -->
     <li class="page-item <?php if ($page <= 1) echo 'disabled'; ?>">
         <a class="page-link" href="?nim=<?php echo urlencode($nimSearch); ?>&page=<?php echo $page - 1; ?>">«</a>
     </li>
-    <!-- Tombol angka halaman -->
-    <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-        <li class="page-item <?php if ($page == $i) echo 'active'; ?>">
-            <a class="page-link" href="?nim=<?php echo urlencode($nimSearch); ?>&page=<?php echo $i; ?>"><?php echo $i; ?></a>
-        </li>
-    <?php endfor; ?>
+    
+    <!-- Tombol angka halaman dengan ... -->
+    <?php 
+    $pagination_limit = 5; // Jumlah maksimal angka halaman yang akan ditampilkan
+    $range_start = max(1, $page - 2); // Menentukan awal range
+    $range_end = min($total_pages, $page + 2); // Menentukan akhir range
+
+    // Halaman sebelumnya dengan "..."
+    if ($range_start > 1) {
+        echo '<li class="page-item"><a class="page-link" href="?nim=' . urlencode($nimSearch) . '&page=1">1</a></li>';
+        echo '<li class="page-item disabled"><a class="page-link" href="#">...</a></li>';
+    }
+
+    // Menampilkan halaman dalam range
+    for ($i = $range_start; $i <= $range_end; $i++) {
+        echo '<li class="page-item ' . ($page == $i ? 'active' : '') . '">';
+        echo '<a class="page-link" href="?nim=' . urlencode($nimSearch) . '&page=' . $i . '">' . $i . '</a>';
+        echo '</li>';
+    }
+
+    // Halaman selanjutnya dengan "..."
+    if ($range_end < $total_pages) {
+        echo '<li class="page-item disabled"><a class="page-link" href="#">...</a></li>';
+        echo '<li class="page-item"><a class="page-link" href="?nim=' . urlencode($nimSearch) . '&page=' . $total_pages . '">' . $total_pages . '</a></li>';
+    }
+    ?>
+
     <!-- Tombol Next -->
     <li class="page-item <?php if ($page >= $total_pages) echo 'disabled'; ?>">
         <a class="page-link" href="?nim=<?php echo urlencode($nimSearch); ?>&page=<?php echo $page + 1; ?>">»</a>
     </li>
-            </ul>
+</ul>
+
         </div>
     </main>
             <footer class="app-footer"> <!--begin::To the end-->

@@ -23,6 +23,7 @@ $imageExists = file_exists($imageFile);
     <title>Document</title>
     <link rel="stylesheet" href="../../../css/adminlte.min.css" crossorigin="anonymous"/>
     <script src="../../../js/adminlte.min.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
     <body class="layout-fixed sidebar-expand-lg bg-body-tertiary"> <!--begin::App Wrapper-->
@@ -63,13 +64,13 @@ $imageExists = file_exists($imageFile);
                 <div class="sidebar-wrapper">
                     <nav class="mt-2"> <!--begin::Sidebar Menu-->
                         <ul class="nav sidebar-menu flex-column" role="menu">
-                            <li class="nav-item"> <a href="infokp.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                            <li class="nav-item"> <a href="infokp.php" class="nav-link"> <i class="nav-icon bi bi-info-circle-fill"></i>
                                 <p>Informasi KP</p>
                             </a> </li>
-                            <li class="nav-item"> <a href="validasi.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                            <li class="nav-item"> <a href="validasi.php" class="nav-link"> <i class="nav-icon bi bi-receipt-cutoff"></i>
                                     <p>Data Validasi KP</p>
                                 </a> </li>
-                            <li class="nav-item"> <a href="../../logout.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                            <li class="nav-item"> <a href="../../logout.php" class="nav-link"> <i class="nav-icon bi bi-box-arrow-left"></i>
                                     <p>Logout</p>
                                 </a> </li>
                         </ul>

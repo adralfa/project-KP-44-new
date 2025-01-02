@@ -55,7 +55,11 @@
                                 </div>
                             </div>
                             <div class="row mb-4">
-                                <div class="col-md-6">
+                                <div class="col-md-3">
+                                    <label for="telp" class="form-label">No Telp</label>
+                                    <input type="text" class="form-control" id="telp" name="telp" placeholder="Nomor Telepon" required>
+                                </div>
+                                <div class="col-md-4">
                                     <label for="prodi" class="form-label">Program Studi</label>
                                     <select class="form-select" id="prodi" name="prodi" aria-label="Default select example" required>
                                         <option selected>--Pilih--</option>
@@ -70,7 +74,7 @@
                                     <label for="angkatan" class="form-label">Angkatan</label>
                                     <input type="text" class="form-control" id="angkatan" name="angkatan" placeholder="Tahun angkatan" required>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <label for="kelas" class="form-label">Kelas</label>
                                     <select class="form-select" id="kelas" name="kelas" aria-label="Default select example" required>
                                         <option selected>--Pilih--</option>

@@ -11,6 +11,71 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] != 'admin') {
 
 require '../../koneksi.php'; // File koneksi ke database
 
+// Number of records per page
+$per_page = 10;
+
+// Get the current page from the URL, default to page 1
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+
+// Calculate the offset
+$offset = ($page - 1) * $per_page;
+
+// Query to get total number of records for pagination
+$total_query = "SELECT COUNT(*) as total FROM kpconnection kc
+                JOIN mahasiswa m ON kc.nim = m.nim
+                JOIN kelompok k ON kc.no_kelompok = k.no_kelompok
+                JOIN dosen d ON kc.nik = d.nik";
+$total_result = $conn->query($total_query);
+$total_rows = $total_result->fetch_assoc()['total'];
+
+// Query to fetch data for current page
+$query = "SELECT k.no_kelompok, m.nim, m.nama, m.jk, m.prodi, m.angkatan, m.kelas, m.mbkm, d.nama_dosen, 
+                 COUNT(*) OVER (PARTITION BY k.no_kelompok) AS jumlah_mahasiswa
+          FROM kpconnection kc
+          JOIN mahasiswa m ON kc.nim = m.nim
+          JOIN kelompok k ON kc.no_kelompok = k.no_kelompok
+          JOIN dosen d ON kc.nik = d.nik
+          ORDER BY k.no_kelompok, m.nama
+          LIMIT $per_page OFFSET $offset";
+
+$result = $conn->query($query);
+
+// Calculate total pages
+$total_pages = ceil($total_rows / $per_page);
+
+// Pagination controls
+$pagination = '';
+if ($page > 1) {
+    $pagination .= '<a href="?page=' . ($page - 1) . '">Previous</a>';
+}
+for ($i = 1; $i <= $total_pages; $i++) {
+    $pagination .= ' <a href="?page=' . $i . '">' . $i . '</a> ';
+}
+if ($page < $total_pages) {
+    $pagination .= '<a href="?page=' . ($page + 1) . '">Next</a>';
+}
+
+// // Tampilkan data mahasiswa yang sesuai dengan halaman
+// echo '<table>';
+// echo '<tr><th>No Kelompok</th><th>NIM</th><th>Nama</th><th>Prodi</th><th>Kelas</th><th>Jumlah Mahasiswa</th><th>Nama Dosen</th></tr>';
+
+// while ($row = $result->fetch_assoc()) {
+//     echo '<tr>';
+//     echo '<td>' . $row['no_kelompok'] . '</td>';
+//     echo '<td>' . $row['nim'] . '</td>';
+//     echo '<td>' . $row['nama'] . '</td>';
+//     echo '<td>' . $row['prodi'] . '</td>';
+//     echo '<td>' . $row['kelas'] . '</td>';
+//     echo '<td>' . $row['jumlah_mahasiswa'] . '</td>';
+//     echo '<td>' . $row['nama_dosen'] . '</td>';
+//     echo '</tr>';
+// }
+
+// echo '</table>';
+
+// // Tampilkan tombol pagination
+// echo '<div>' . $pagination . '</div>';
+
 if (isset($_POST['generate_team'])) {
     // Ambil data mahasiswa yang belum memiliki kelompok
     $query = "SELECT * FROM mahasiswa 
@@ -283,12 +348,9 @@ $result = $conn->query($query);
     <title>Pengelolaan Data Kerja Praktek</title>
     <link rel="stylesheet" href="../../../css/adminlte.min.css" crossorigin="anonymous"/>
     <script src="../../../js/adminlte.min.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
-    <?php
-        error_reporting(E_ALL);
-        ini_set('display_errors', 1);
-    ?>
     <div class="app-wrapper">
         <nav class="app-header navbar navbar-expand bg-body">
             <div class="container-fluid">
@@ -321,25 +383,25 @@ $result = $conn->query($query);
         <div class="sidebar-wrapper">
                     <nav class="mt-2"> <!--begin::Sidebar Menu-->
                     <ul class="nav sidebar-menu flex-column" role="menu">
-                            <li class="nav-item"> <a href="infokp.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                    <li class="nav-item"> <a href="infokp.php" class="nav-link"> <i class="nav-icon bi bi-info-circle-fill"></i>
                                 <p>Informasi KP</p>
                             </a> </li>
-                            <li class="nav-item"> <a href="mahasiswa.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                            <li class="nav-item"> <a href="mahasiswa.php" class="nav-link"> <i class="nav-icon bi bi-person-fill"></i>
                                     <p>Data Mahasiswa</p>
                                 </a> </li>
-                            <li class="nav-item"> <a href="kelompok.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                            <li class="nav-item"> <a href="kelompok.php" class="nav-link"> <i class="nav-icon bi bi-people-fill"></i>
                                     <p>Data Kelompok</p>
                                 </a> </li>
-                            <li class="nav-item"> <a href="dosen.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                            <li class="nav-item"> <a href="dosen.php" class="nav-link"> <i class="nav-icon bi bi-mortarboard-fill"></i>
                                     <p>Data Dosen</p>
                                 </a> </li>
-                            <li class="nav-item"> <a href="mitra.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                            <li class="nav-item"> <a href="mitra.php" class="nav-link"> <i class="nav-icon bi bi-building-fill"></i>
                                     <p>Data Mitra</p>
                                 </a> </li>
                             <!-- <li class="nav-item"> <a href="staff.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
                                     <p>Data Staff</p>
                                 </a> </li> -->
-                            <li class="nav-item"> <a href="../../logout.php" class="nav-link"> <i class="nav-icon bi bi-circle"></i>
+                            <li class="nav-item"> <a href="../../logout.php" class="nav-link"> <i class="nav-icon bi bi-box-arrow-left"></i>
                                     <p>Logout</p>
                                 </a> </li>
                         </ul>

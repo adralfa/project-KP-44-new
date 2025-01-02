@@ -33,8 +33,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         exit;
     } else {
-        $query = "SELECT * FROM mahasiswa WHERE email = '$email'";
-    $result = $conn->query($query);
+        $query = "
+            SELECT m.*, kc.no_kelompok 
+            FROM mahasiswa m
+            LEFT JOIN kpconnection kc ON m.nim = kc.nim
+            WHERE m.email = ?
+        ";
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
 
     if ($result->num_rows == 1) {
         // Data ditemukan, ambil hasilnya
@@ -46,6 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_SESSION['user_nim'] = $user['nim'];
             $_SESSION['user_name'] = $user['nama'];
             $_SESSION['user_role'] = 'mahasiswa';
+            $_SESSION['no_kelompok'] = $user['no_kelompok'] ?? '-'; // Gunakan '-' jika no_kelompok tidak ditemukan
 
             // Set pesan berhasil login
             $_SESSION['success'] = "Login berhasil! Selamat datang, {$user['nama']}.";
