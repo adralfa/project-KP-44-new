@@ -29,7 +29,7 @@ error_reporting(E_ALL);
     <div class="container-fluid register">
         <div class="row d-flex align-items-center">
         <?php if (isset($_SESSION['status']) && isset($_SESSION['message'])): ?>
-    <div class="alert alert-<?php echo $_SESSION['status']; ?> alert-dismissible fade show" role="alert">
+    <div class="alert alert-fixed alert-<?php echo $_SESSION['status']; ?> alert-dismissible fade show" role="alert">
         <?php echo $_SESSION['message']; ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
@@ -40,7 +40,7 @@ error_reporting(E_ALL);
     if (alertElement) {
         alertElement.remove();
     }
-}, 3000);
+}, 7000);
     </script>
     <?php unset($_SESSION['status']); unset($_SESSION['message']); ?>
     <?php endif; ?>

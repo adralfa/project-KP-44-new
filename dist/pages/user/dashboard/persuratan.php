@@ -49,13 +49,9 @@ if ($stmt) {
 
 use PhpOffice\PhpWord\TemplateProcessor;
 
-$alertMessage = ''; // Variabel untuk alert message
-$alertType = ''; // Variabel untuk tipe alert (success, danger, etc.)
-
 // Validasi session nomor kelompok
 if (!isset($_SESSION['no_kelompok'])) {
-    $alertMessage = 'Nomor kelompok tidak ditemukan dalam session!';
-    $alertType = 'danger';
+    $_SESSION['error_message'] = 'Nomor kelompok tidak ditemukan dalam session!';
 }
 
 $noKelompok = $_SESSION['no_kelompok'];
@@ -70,8 +66,7 @@ $queryMitra = "
 $resultMitra = mysqli_query($conn, $queryMitra);
 if (!$resultMitra) {
     error_log('Query mitra gagal: ' . mysqli_error($conn));
-    $alertMessage = 'Gagal mengambil data mitra.';
-    $alertType = 'danger';
+    $_SESSION['error_message'] = 'Gagal mengambil data mitra.';
     exit;
 }
 
@@ -87,13 +82,12 @@ $queryMahasiswa = "
 $resultMahasiswa = mysqli_query($conn, $queryMahasiswa);
 if (!$resultMahasiswa) {
     error_log('Query mahasiswa gagal: ' . mysqli_error($conn));
-    $alertMessage = 'Gagal mengambil data mahasiswa.';
-    $alertType = 'danger';
+    $_SESSION['error_message'] = 'Gagal mengambil data mahasiswa.';
     exit;
 }
 
 // Query riwayat surat
-$queryRiwayatSurat = "SELECT * FROM surat WHERE no_kelompok = '$noKelompok'";
+$queryRiwayatSurat = "SELECT * FROM surat WHERE no_kelompok = '$noKelompok' ORDER BY tanggal DESC";
 $resultRiwayatSurat = mysqli_query($conn, $queryRiwayatSurat);
 
 if (!$resultRiwayatSurat) {
@@ -144,8 +138,7 @@ if (isset($_POST['submit'])) {
         // Format tanggal
         date_default_timezone_set('Asia/Jakarta');
         if (!date_default_timezone_set('Asia/Jakarta')) {
-            $alertMessage = 'Gagal mengatur zona waktu.';
-            $alertType = 'danger';
+            $_SESSION['error_message'] = 'Gagal mengatur zona waktu.';
         }
 
         $datetime = new DateTime('now');
@@ -196,8 +189,7 @@ if (isset($_POST['submit'])) {
             $stmt = mysqli_prepare($conn, $queryInsertHistory);
             if (!$stmt) {
                 error_log("Gagal menyiapkan statement: " . mysqli_error($conn));
-                $alertMessage = 'Gagal menyiapkan statement untuk database.';
-                $alertType = 'danger';
+                $_SESSION['error_message'] = 'Gagal menyiapkan statement untuk database.';
                 exit;
             }
 
@@ -206,12 +198,11 @@ if (isset($_POST['submit'])) {
         
             if (mysqli_stmt_execute($stmt)) {
                 error_log("Data surat berhasil disimpan ke database.");
-                $alertMessage = 'Surat berhasil dibuat dan disimpan!';
-                $alertType = 'success';
+                $_SESSION['success_message'] = 'Surat berhasil dibuat dan disimpan!';
             } else {
                 error_log('Gagal menyimpan data surat ke database: ' . mysqli_stmt_error($stmt));
-                $alertMessage = 'Gagal menyimpan data surat ke database.';
-                $alertType = 'danger';
+                $_SESSION['error
+                _message'] = 'Gagal menyimpan data surat ke database.';
             }
         
             mysqli_stmt_close($stmt);
@@ -236,8 +227,7 @@ if (isset($_POST['submit'])) {
 
         // Tampilkan tautan unduh
         header('Location: persuratan.php');
-        $alertMessage = 'Surat berhasil dibuat: <a href="$outputFile" class="btn btn-primary" download>Download Surat</a>';
-        $alertType = 'success';
+        $_SESSION['success_message'] = 'Surat berhasil dibuat: <a href="' . $outputFile . '" download>Download Surat</a>';
         exit;
 
     } catch (Exception $e) {
@@ -245,9 +235,6 @@ if (isset($_POST['submit'])) {
         // header('Location: suratkemitra.php');
         echo '<div class="alert alert-danger">Terjadi kesalahan: ' . $e->getMessage() . '</div>';
     }
-
-    $_SESSION['alert_message'] = $alertMessage;
-    $_SESSION['alert_type'] = $alertType;
     exit;
 }
 ?>
@@ -262,6 +249,16 @@ if (isset($_POST['submit'])) {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="../../../js/adminlte.min.js" crossorigin="anonymous"></script>
     <style>
+        .alert-fixed {
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1050;
+            margin: 10px 0;
+            width: auto;
+            max-width: 80%;
+        }
         .nav-link.disabled {
     pointer-events: none; /* Mencegah klik */
     color: #6c757d; /* Warna abu-abu untuk tampilan disable */
@@ -272,6 +269,19 @@ if (isset($_POST['submit'])) {
 </head>
 <body>
     <body class="layout-fixed sidebar-expand-lg"> <!--begin::App Wrapper-->
+    <?php if (isset($_SESSION['success_message'])): ?>
+    <div class="alert alert-success alert-dismissible alert-fixed mx-3 mt-3 fade show" id="alert" role="alert">
+        <?= $_SESSION['success_message'] ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <?php unset($_SESSION['success_message']); endif; ?>
+
+    <?php if (isset($_SESSION['error_message'])): ?>
+    <div class="alert alert-danger alert-dismissible alert-fixed mx-3 mt-3 fade show" id="alert" role="alert">
+        <?= $_SESSION['error_message'] ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <?php unset($_SESSION['error_message']); endif; ?>
         <div class="app-wrapper"> <!--begin::Header-->
             <nav class="app-header navbar navbar-expand bg-body"> <!--begin::Container-->
                 <div class="container-fluid"> <!--begin::Start Navbar Links-->
@@ -377,21 +387,50 @@ if (isset($_POST['submit'])) {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php
-                                        $no = 1;
-                                        mysqli_data_seek($resultMahasiswa, 0);
-                                        while ($row = mysqli_fetch_assoc($resultMahasiswa)) {
-                                            $jenjang = ($row['prodi'] == 'MI') ? 'D3' : 'S1';
-                                            echo "<tr>
-                                                <td>{$no}</td>
-                                                <td>{$row['nim']}</td>
-                                                <td>{$row['nama']}</td>
-                                                <td>{$row['prodi']}</td>
-                                                <td>{$jenjang}</td>
-                                            </tr>";
-                                            $no++;
-                                        }
-                                        ?>
+                                    <?php
+$no = 1;
+mysqli_data_seek($resultMahasiswa, 0);
+while ($row = mysqli_fetch_assoc($resultMahasiswa)) {
+    // Menentukan jenjang pendidikan dan prodi
+    $jenjang = ($row['prodi'] == 'MI') ? 'D3' : 'S1';
+    $prodi = $row['prodi'];
+
+    // Jika prodi adalah 'TI', ubah menjadi 'Teknik Informatika S1'
+    switch ($prodi) {
+        case 'TI':
+            $prodi = 'Teknik Informatika S1';
+            break;
+
+        case 'SI':
+            $prodi = 'Sistem Informasi S1';
+            break;
+
+        case 'DKV':
+            $prodi = 'Desain Komunikasi Visual S1';
+            break;
+
+        case 'MI':
+            $prodi = 'Manajemen Informatika D3';
+            break;
+
+        case 'TS':
+            $prodi = 'Teknik Sipil S1';
+            break;
+        
+        default:
+            break;
+    }
+
+    echo "<tr>
+        <td>{$no}</td>
+        <td>{$row['nim']}</td>
+        <td>{$row['nama']}</td>
+        <td>{$prodi}</td>
+        <td>{$jenjang}</td>
+    </tr>";
+    $no++;
+}
+?>
                                     </tbody>
                                 </table>
                             </div>
@@ -447,17 +486,18 @@ if (isset($_POST['submit'])) {
         </div>
     </body><!--end::Body-->
     <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // Menunggu hingga DOM siap
-        var alertMessage = document.getElementById('alertMessage');
-        if (alertMessage) {
-            // Jika ada pesan alert, set timeout untuk menghilangkan pesan setelah 3 detik
-            setTimeout(function() {
-                alertMessage.style.display = 'none';
-            }, 3000); // 3000 milidetik = 3 detik
+        document.addEventListener('DOMContentLoaded', function () {
+        const alert = document.getElementById('alert');
+        if (alert) {
+            setTimeout(() => {
+                alert.classList.remove('show'); // Menghilangkan animasi fade
+                setTimeout(() => {
+                    alert.remove(); // Menghapus elemen dari DOM
+                }, 150); // Waktu sinkron dengan animasi fade
+            }, 3000); // Durasi 3 detik sebelum alert dihapus
         }
     });
-</script>
+    </script>
 
 </body>
 </html>

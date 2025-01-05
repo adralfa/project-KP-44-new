@@ -183,6 +183,9 @@ $stmt->close();
             $stmt->bind_param("ii", $id_mitra, $no_kelompok);
             $stmt->execute();
             $stmt->close();
+
+            // Set session alert message
+            $_SESSION['success_message'] = 'Data kelompok berhasil diperbarui!';
     
             // Redirect setelah update
             header("Location: infokelompok.php");
@@ -224,6 +227,19 @@ $stmt->close();
 </head>
 <body>
     <body class="layout-fixed sidebar-expand-lg"> <!--begin::App Wrapper-->
+    <?php if (isset($_SESSION['success_message'])): ?>
+    <div class="alert alert-success alert-dismissible alert-fixed mx-3 mt-3 fade show" id="alert" role="alert">
+        <?= $_SESSION['success_message'] ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <?php unset($_SESSION['success_message']); endif; ?>
+
+    <?php if (isset($_SESSION['error_message'])): ?>
+    <div class="alert alert-danger alert-dismissible alert-fixed mx-3 mt-3 fade show" id="alert" role="alert">
+        <?= $_SESSION['error_message'] ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <?php unset($_SESSION['error_message']); endif; ?>
         <div class="app-wrapper"> <!--begin::Header-->
             <nav class="app-header navbar navbar-expand bg-body"> <!--begin::Container-->
                 <div class="container-fluid"> <!--begin::Start Navbar Links-->
@@ -348,7 +364,7 @@ $stmt->close();
     <tr>
         <td><?= htmlspecialchars($mhs['nim']) ?></td>
         <td class="text-start"><?= htmlspecialchars($mhs['nama']) ?></td>
-        <td><?= htmlspecialchars($mhs['kelas']) ?></td>
+        <td><?= htmlspecialchars($mhs['prodi'] . '-' . $mhs['angkatan'] . '-' . $mhs['kelas']) ?></td>
         <td><?= htmlspecialchars($mhs['telp']) ?></td>
         <td><?= htmlspecialchars($mhs['jaket']) ?></td>
         <td><?= $mhs['status_validasi'] == '1' ? 'Valid' : 'Belum Valid' ?></td>
@@ -378,5 +394,18 @@ $stmt->close();
             </footer> <!--end::Footer-->
         </div>
     </body><!--end::Body-->
-</body>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+        const alert = document.getElementById('alert');
+        if (alert) {
+            setTimeout(() => {
+                alert.classList.remove('show'); // Menghilangkan animasi fade
+                setTimeout(() => {
+                    alert.remove(); // Menghapus elemen dari DOM
+                }, 150); // Waktu sinkron dengan animasi fade
+            }, 3000); // Durasi 3 detik sebelum alert dihapus
+        }
+    });
+    </script>
+</body> 
 </html>

@@ -15,7 +15,60 @@ if (!$conn) {
     die("Koneksi database gagal: " . mysqli_connect_error());
 }
 
+// Ambil nilai pencarian dari form
+$search = isset($_GET['search']) ? $_GET['search'] : '';
+
 // Query untuk mendapatkan data mitra yang terhubung dengan kelompok
+$query_search = "
+    SELECT 
+        m.id_mitra, 
+        m.nama_mitra, 
+        m.lokasi, 
+        GROUP_CONCAT(DISTINCT kc.no_kelompok ORDER BY kc.no_kelompok ASC SEPARATOR ', ') AS no_kelompok
+    FROM mitra m
+    INNER JOIN kpconnection kc ON m.id_mitra = kc.id_mitra
+    WHERE m.nama_mitra LIKE ? OR kc.no_kelompok LIKE ?
+    GROUP BY m.id_mitra, m.nama_mitra, m.lokasi
+";
+
+// Menyiapkan query dengan parameter pencarian
+$stmt = mysqli_prepare($conn, $query_search);
+$searchTerm = '%' . $search . '%';
+mysqli_stmt_bind_param($stmt, 'ss', $searchTerm, $searchTerm);
+
+// Eksekusi query
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
+
+// Periksa jika query gagal
+if (!$result) {
+    die("Query gagal: " . mysqli_error($conn));
+}
+
+// Konfigurasi pagination
+$perPage = 10; // Jumlah data per halaman
+$page = isset($_GET['page']) ? $_GET['page'] : 1; // Halaman yang sedang aktif
+$start = ($page - 1) * $perPage; // Posisi mulai data
+
+// Ambil nilai pencarian dari form
+$search = isset($_GET['search']) ? $_GET['search'] : '';
+
+// Query untuk menghitung total data mitra (untuk pagination)
+$totalQuery = "
+    SELECT COUNT(DISTINCT m.id_mitra) AS total
+    FROM mitra m
+    INNER JOIN kpconnection kc ON m.id_mitra = kc.id_mitra
+    WHERE m.nama_mitra LIKE ? OR kc.no_kelompok LIKE ?
+";
+$stmtTotal = mysqli_prepare($conn, $totalQuery);
+$searchTerm = '%' . $search . '%';
+mysqli_stmt_bind_param($stmtTotal, 'ss', $searchTerm, $searchTerm);
+mysqli_stmt_execute($stmtTotal);
+$totalResult = mysqli_stmt_get_result($stmtTotal);
+$totalData = mysqli_fetch_assoc($totalResult)['total'];
+$totalPages = ceil($totalData / $perPage); // Menghitung total halaman
+
+// Query untuk mendapatkan data mitra berdasarkan pencarian dan pagination
 $query = "
     SELECT 
         m.id_mitra, 
@@ -24,14 +77,22 @@ $query = "
         GROUP_CONCAT(DISTINCT kc.no_kelompok ORDER BY kc.no_kelompok ASC SEPARATOR ', ') AS no_kelompok
     FROM mitra m
     INNER JOIN kpconnection kc ON m.id_mitra = kc.id_mitra
+    WHERE m.nama_mitra LIKE ? OR kc.no_kelompok LIKE ?
     GROUP BY m.id_mitra, m.nama_mitra, m.lokasi
+    LIMIT ?, ?
 ";
-$result = mysqli_query($conn, $query);
+
+// Menyiapkan query dengan parameter pencarian dan pagination
+$stmt = mysqli_prepare($conn, $query);
+mysqli_stmt_bind_param($stmt, 'ssii', $searchTerm, $searchTerm, $start, $perPage);
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
 
 // Periksa jika query gagal
 if (!$result) {
     die("Query gagal: " . mysqli_error($conn));
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -113,35 +174,65 @@ if (!$result) {
             <div class="container-fluid px-5 py-3">
                 <h1>Data Mitra</h1>
                 <p>Data Mitra yang Menjalin Kerjasama dengan Kelompok Kerja Praktek</p>
-                <table class="table table-bordered mt-3">
-                    <thead>
-                        <tr>
-                            <th>No</th>
-                            <th>Nama Mitra</th>
-                            <th>Lokasi Mitra</th>
-                            <th>Kelompok yang Bekerjasama</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php
-                        $no = 1;
-                        while ($row = mysqli_fetch_assoc($result)) {
-                            echo "<tr class='align-middle'>";
-                            echo "<td>{$no}</td>";
-                            echo "<td>" . htmlspecialchars($row['nama_mitra']) . "</td>";
-                            echo "<td>" . htmlspecialchars($row['lokasi']) . "</td>";
-                            echo "<td>" . htmlspecialchars($row['no_kelompok']) . "</td>";
-                            echo "<td>
-                                    <button class='btn btn-primary' type='button'>Ubah</button>
-                                    <button class='btn btn-danger' type='button'>Hapus</button>
-                                  </td>";
-                            echo "</tr>";
-                            $no++;
-                        }
-                        ?>
-                    </tbody>
-                </table>
+                <div class="row">
+                    <div class="col-7"></div>
+                    <div class="col-5">
+                    <form class="d-flex mb-3" method="GET">
+        <input type="text" name="search" class="form-control me-2" placeholder="Cari Nama Mitra atau Kelompok" value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>">
+        <button class="btn btn-primary" type="submit">Cari</button>
+    </form>
+                    </div>
+</div>
+
+<table class="table table-bordered mt-3">
+    <thead>
+        <tr>
+            <th>No</th>
+            <th>Nama Mitra</th>
+            <th>Lokasi Mitra</th>
+            <th>Kelompok yang Bekerjasama</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php
+        $no = $start + 1;
+        if (mysqli_num_rows($result) > 0) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                echo "<tr class='align-middle'>";
+                echo "<td>{$no}</td>";
+                echo "<td>" . htmlspecialchars($row['nama_mitra']) . "</td>";
+                echo "<td>" . htmlspecialchars($row['lokasi']) . "</td>";
+                echo "<td>" . htmlspecialchars($row['no_kelompok']) . "</td>";
+                $no++;
+            }
+        } else {
+            // Menampilkan pesan jika tidak ada data hasil pencarian
+            echo "<tr><td colspan='4' class='text-center'>Hasil pencarian tidak ditemukan</td></tr>";
+        }
+        ?>
+    </tbody>
+</table>
+
+<!-- Pagination -->
+<div class="pagination pagination-sm m-0 float-end">
+    <?php if ($page > 1): ?>
+        <a href="?search=<?php echo htmlspecialchars($search); ?>&page=1" class="page-item page-link">First</a>
+        <a href="?search=<?php echo htmlspecialchars($search); ?>&page=<?php echo $page - 1; ?>" class="page-item page-link">Prev</a>
+    <?php endif; ?>
+
+    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+        <a href="?search=<?php echo htmlspecialchars($search); ?>&page=<?php echo $i; ?>" class="page-item page-link <?php echo $i == $page ? 'active' : ''; ?>">
+            <?php echo $i; ?>
+        </a>
+    <?php endfor; ?>
+
+    <?php if ($page < $totalPages): ?>
+        <a href="?search=<?php echo htmlspecialchars($search); ?>&page=<?php echo $page + 1; ?>" class="page-item page-link">Next</a>
+        <a href="?search=<?php echo htmlspecialchars($search); ?>&page=<?php echo $totalPages; ?>" class="page-item page-link">Last</a>
+    <?php endif; ?>
+</div>
+
+
             </div>
         </main>
         <footer class="app-footer">

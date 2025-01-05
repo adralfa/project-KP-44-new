@@ -134,6 +134,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
     <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
+    <?php if (!empty($statusMessageIMG)): ?>
+            <div class="alert <?php echo $alertClassIMG; ?> alert-dismissible fade show alert-fixed" role="alert" id="alertIMG">
+                <?php echo $statusMessageIMG; ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <script>
+                setTimeout(function() {
+                    document.getElementById('alertIMG').classList.remove('show');
+                }, 3000);
+            </script>
+        <?php endif; ?>
+
+        <?php if (!empty($statusMessagePDF)): ?>
+            <div class="alert <?php echo $alertClassPDF; ?> alert-dismissible fade show alert-fixed" role="alert" id="alertPDF">
+                <?php echo $statusMessagePDF; ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <script>
+                setTimeout(function() {
+                    document.getElementById('alertPDF').classList.remove('show');
+                }, 3000);
+            </script>
+        <?php endif; ?>
+        
         <div class="app-wrapper">
             <nav class="app-header navbar navbar-expand bg-body">
                 <div class="container-fluid">
@@ -208,59 +232,91 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <h3>Fakultas Ilmu Komputer 2024</h3>
                         </div>
                     </div>
-                    <div class="row mt-3 px-5 py-3"> <!--begin::Col-->
-                        <div class="col-lg-3 col-6"> <!--begin::Small Box Widget 1-->
-                            <div class="small-box text-bg-primary">
-                                <div class="inner">
-                                    <h3><?php echo $totalMahasiswa; ?></h3>
-                                    <p>Mahasiswa Peserta KP</p>
-                                </div> <a href="mahasiswa.php" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
-                                    More info <i class="bi bi-link-45deg"></i> </a>
-                            </div> <!--end::Small Box Widget 1-->
-                        </div> <!--end::Col-->
-                        <div class="col-lg-3 col-6"> <!--begin::Small Box Widget 2-->
-                            <div class="small-box text-bg-success">
-                                <div class="inner">
-                                    <h3><?php echo $totalKelompok; ?></h3>
-                                    <p>Kelompok KP</p>
-                                </div> <a href="kelompok.php" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
-                                    More info <i class="bi bi-link-45deg"></i> </a>
-                            </div> <!--end::Small Box Widget 2-->
-                        </div> <!--end::Col-->
-                        <div class="col-lg-3 col-6"> <!--begin::Small Box Widget 3-->
-                            <div class="small-box text-bg-warning">
-                                <div class="inner">
-                                    <h3><?php echo $totalDosen; ?></h3>
-                                    <p>Dosen Pembimbing</p>
-                                </div> <a href="dosen.php" class="small-box-footer link-dark link-underline-opacity-0 link-underline-opacity-50-hover">
-                                    More info <i class="bi bi-link-45deg"></i> </a>
-                            </div> <!--end::Small Box Widget 3-->
-                        </div> <!--end::Col-->
-                        <div class="col-lg-3 col-6"> <!--begin::Small Box Widget 4-->
-                            <div class="small-box text-bg-danger">
-                                <div class="inner">
-                                    <h3><?php echo $totalMitra; ?></h3>
-                                    <p>Mitra yang Bekerjasama</p>
-                                </div><a href="mitra.php" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
-                                    More info <i class="bi bi-link-45deg"></i> </a>
-                            </div> <!--end::Small Box Widget 4-->
-                        </div> <!--end::Col-->
-                    </div> <!--end::Row--> 
+                    <div class="row mt-3 px-5 py-3">
+    <!--begin::Col-->
+    <div class="col-lg-3 col-6">
+        <!--begin::Small Box Widget 1-->
+        <div class="small-box text-bg-primary">
+            <div class="inner d-flex justify-content-between align-items-center">
+                <div>
+                    <h3><?php echo $totalMahasiswa; ?></h3>
+                    <p>Mahasiswa Peserta KP</p>
+                </div>
+                <!-- Menambahkan ikon SVG di sebelah kanan -->
+                <i class="bi bi-person-fill" style="font-size: 60px;"></i> <!-- Ikon Mahasiswa -->
+            </div>
+            <a href="mahasiswa.php" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+                More info <i class="bi bi-link-45deg"></i> <!-- Ikon Tautan -->
+            </a>
+        </div>
+        <!--end::Small Box Widget 1-->
+    </div>
+    <!--end::Col-->
+    
+    <div class="col-lg-3 col-6">
+        <!--begin::Small Box Widget 2-->
+        <div class="small-box text-bg-success">
+            <div class="inner d-flex justify-content-between align-items-center">
+                <div>
+                    <h3><?php echo $totalKelompok; ?></h3>
+                    <p>Kelompok KP</p>
+                </div>
+                <!-- Menambahkan ikon SVG di sebelah kanan -->
+                <i class="bi bi-people-fill" style="font-size: 60px;"></i> <!-- Ikon Kelompok -->
+            </div>
+            <a href="kelompok.php" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+                More info <i class="bi bi-link-45deg"></i> <!-- Ikon Tautan -->
+            </a>
+        </div>
+        <!--end::Small Box Widget 2-->
+    </div>
+    <!--end::Col-->
+    
+    <div class="col-lg-3 col-6">
+        <!--begin::Small Box Widget 3-->
+        <div class="small-box text-bg-warning">
+            <div class="inner d-flex justify-content-between align-items-center">
+                <div>
+                    <h3><?php echo $totalDosen; ?></h3>
+                    <p>Dosen Pembimbing</p>
+                </div>
+                <!-- Menambahkan ikon SVG di sebelah kanan -->
+                <i class="bi bi-mortarboard-fill" style="font-size: 60px;"></i> <!-- Ikon Dosen -->
+            </div>
+            <a href="dosen.php" class="small-box-footer link-dark link-underline-opacity-0 link-underline-opacity-50-hover">
+                More info <i class="bi bi-link-45deg"></i> <!-- Ikon Tautan -->
+            </a>
+        </div>
+        <!--end::Small Box Widget 3-->
+    </div>
+    <!--end::Col-->
+    
+    <div class="col-lg-3 col-6">
+        <!--begin::Small Box Widget 4-->
+        <div class="small-box text-bg-danger">
+            <div class="inner d-flex justify-content-between align-items-center">
+                <div>
+                    <h3><?php echo $totalMitra; ?></h3>
+                    <p>Mitra yang Bekerjasama</p>
+                </div>
+                <!-- Menambahkan ikon SVG di sebelah kanan -->
+                <i class="bi bi-building-fill" style="font-size: 60px;"></i> <!-- Ikon Mitra -->
+            </div>
+            <a href="mitra.php" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+                More info <i class="bi bi-link-45deg"></i> <!-- Ikon Tautan -->
+            </a>
+        </div>
+        <!--end::Small Box Widget 4-->
+    </div>
+    <!--end::Col-->
+</div>
+<!--end::Row-->
+
 
                     <form action="" method="POST" enctype="multipart/form-data">
                         <div class="row px-5 py-3">
                             <label for="jadwalFile" class="form-label fw-bold">Upload Jadwal Kerja Praktik (Gambar)</label>
-                            <?php if (!empty($statusMessageIMG)): ?>
-            <div class="alert <?php echo $alertClassIMG; ?> alert-dismissible fade show alert-fixed" role="alert" id="alertIMG">
-                <?php echo $statusMessageIMG; ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            <script>
-                setTimeout(function() {
-                    document.getElementById('alertIMG').classList.remove('show');
-                }, 3000);
-            </script>
-        <?php endif; ?>
+                            
                             <div class="col-9">
                                 <input class="form-control" type="file" id="jadwalFile" name="jadwalFile" accept="image/*">
                             </div>
@@ -271,17 +327,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                         <div class="row px-5 py-3">
                             <label for="pedomanFile" class="form-label fw-bold">Upload Pedoman Kerja Praktik (PDF)</label>
-                            <?php if (!empty($statusMessagePDF)): ?>
-            <div class="alert <?php echo $alertClassPDF; ?> alert-dismissible fade show alert-fixed" role="alert" id="alertPDF">
-                <?php echo $statusMessagePDF; ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            <script>
-                setTimeout(function() {
-                    document.getElementById('alertPDF').classList.remove('show');
-                }, 3000);
-            </script>
-        <?php endif; ?>
+                            
                             <div class="col-9">
                                 <input class="form-control" type="file" id="pedomanFile" name="pedomanFile" accept="application/pdf">
                             </div>

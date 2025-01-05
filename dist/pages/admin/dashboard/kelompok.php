@@ -11,76 +11,91 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] != 'admin') {
 
 require '../../koneksi.php'; // File koneksi ke database
 
-// Number of records per page
-$per_page = 10;
+// Konfigurasi Pagination
+$limit_per_page = 3; // Menampilkan 3 kelompok per halaman
+$page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+$offset = ($page - 1) * $limit_per_page;
 
-// Get the current page from the URL, default to page 1
-$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+// Fungsi Pencarian
+$search_keyword = isset($_GET['search']) ? trim($_GET['search']) : '';
+$where_clause = !empty($search_keyword) ? "AND k.no_kelompok = ?" : "";
 
-// Calculate the offset
-$offset = ($page - 1) * $per_page;
-
-// Query to get total number of records for pagination
-$total_query = "SELECT COUNT(*) as total FROM kpconnection kc
-                JOIN mahasiswa m ON kc.nim = m.nim
-                JOIN kelompok k ON kc.no_kelompok = k.no_kelompok
-                JOIN dosen d ON kc.nik = d.nik";
-$total_result = $conn->query($total_query);
-$total_rows = $total_result->fetch_assoc()['total'];
-
-// Query to fetch data for current page
-$query = "SELECT k.no_kelompok, m.nim, m.nama, m.jk, m.prodi, m.angkatan, m.kelas, m.mbkm, d.nama_dosen, 
-                 COUNT(*) OVER (PARTITION BY k.no_kelompok) AS jumlah_mahasiswa
-          FROM kpconnection kc
-          JOIN mahasiswa m ON kc.nim = m.nim
-          JOIN kelompok k ON kc.no_kelompok = k.no_kelompok
-          JOIN dosen d ON kc.nik = d.nik
-          ORDER BY k.no_kelompok, m.nama
-          LIMIT $per_page OFFSET $offset";
-
-$result = $conn->query($query);
-
-// Calculate total pages
-$total_pages = ceil($total_rows / $per_page);
-
-// Pagination controls
-$pagination = '';
-if ($page > 1) {
-    $pagination .= '<a href="?page=' . ($page - 1) . '">Previous</a>';
+// Hitung Total Kelompok
+$total_group_sql = "
+    SELECT COUNT(DISTINCT k.no_kelompok) AS total 
+    FROM kelompok k 
+    LEFT JOIN kpconnection kc ON k.no_kelompok = kc.no_kelompok 
+    WHERE kc.nim IS NOT NULL $where_clause";
+$total_group_stmt = $conn->prepare($total_group_sql);
+if (!empty($search_keyword)) {
+    $total_group_stmt->bind_param("s", $search_keyword);
 }
-for ($i = 1; $i <= $total_pages; $i++) {
-    $pagination .= ' <a href="?page=' . $i . '">' . $i . '</a> ';
+$total_group_stmt->execute();
+$total_groups = $total_group_stmt->get_result()->fetch_assoc()['total'];
+$total_pages = ceil($total_groups / $limit_per_page);
+
+// Ambil Kelompok Berdasarkan Pagination
+$group_sql = "
+    SELECT DISTINCT k.no_kelompok 
+    FROM kelompok k 
+    LEFT JOIN kpconnection kc ON k.no_kelompok = kc.no_kelompok 
+    WHERE kc.nim IS NOT NULL $where_clause 
+    LIMIT ? OFFSET ?";
+$group_stmt = $conn->prepare($group_sql);
+if (!empty($search_keyword)) {
+    $group_stmt->bind_param("ssi", $search_keyword, $limit_per_page, $offset);
+} else {
+    $group_stmt->bind_param("ii", $limit_per_page, $offset);
 }
-if ($page < $total_pages) {
-    $pagination .= '<a href="?page=' . ($page + 1) . '">Next</a>';
+$group_stmt->execute();
+$group_result = $group_stmt->get_result();
+
+// Ambil Data Kelompok
+$kelompok_ids = [];
+while ($group_row = $group_result->fetch_assoc()) {
+    $kelompok_ids[] = $group_row['no_kelompok'];
 }
 
-// // Tampilkan data mahasiswa yang sesuai dengan halaman
-// echo '<table>';
-// echo '<tr><th>No Kelompok</th><th>NIM</th><th>Nama</th><th>Prodi</th><th>Kelas</th><th>Jumlah Mahasiswa</th><th>Nama Dosen</th></tr>';
+// Jika Tidak Ada Kelompok
+if (empty($kelompok_ids)) {
+    echo "Tidak ada data untuk ditampilkan.";
+    exit;
+}
 
-// while ($row = $result->fetch_assoc()) {
-//     echo '<tr>';
-//     echo '<td>' . $row['no_kelompok'] . '</td>';
-//     echo '<td>' . $row['nim'] . '</td>';
-//     echo '<td>' . $row['nama'] . '</td>';
-//     echo '<td>' . $row['prodi'] . '</td>';
-//     echo '<td>' . $row['kelas'] . '</td>';
-//     echo '<td>' . $row['jumlah_mahasiswa'] . '</td>';
-//     echo '<td>' . $row['nama_dosen'] . '</td>';
-//     echo '</tr>';
-// }
+// Ambil Data Mahasiswa Berdasarkan Kelompok
+$placeholders = implode(',', array_fill(0, count($kelompok_ids), '?'));
+$data_sql = "
+    SELECT 
+        m.nim, 
+        m.nama AS nama_mahasiswa,
+        m.telp,    
+        m.prodi,
+        m.angkatan, 
+        m.kelas,
+        k.no_kelompok,
+        d.nama_dosen
+    FROM mahasiswa m
+    LEFT JOIN kpconnection kc ON m.nim = kc.nim
+    LEFT JOIN kelompok k ON kc.no_kelompok = k.no_kelompok
+    LEFT JOIN dosen d ON kc.nik = d.nik
+    WHERE k.no_kelompok IN ($placeholders)
+    ORDER BY k.no_kelompok, m.nama";
+$data_stmt = $conn->prepare($data_sql);
+$data_stmt->bind_param(str_repeat('s', count($kelompok_ids)), ...$kelompok_ids);
+$data_stmt->execute();
+$data_result = $data_stmt->get_result();
 
-// echo '</table>';
-
-// // Tampilkan tombol pagination
-// echo '<div>' . $pagination . '</div>';
+// Kelompokkan Data
+$kelompok_data = [];
+while ($row = $data_result->fetch_assoc()) {
+    $kelompok_data[$row['no_kelompok']][] = $row;
+}
 
 if (isset($_POST['generate_team'])) {
     // Ambil data mahasiswa yang belum memiliki kelompok
     $query = "SELECT * FROM mahasiswa 
     WHERE nim NOT IN (SELECT nim FROM kpconnection) 
-    ORDER BY CASE prodi
+    ORDER BY CASE prodi 
     WHEN 'DKV' THEN 1
     WHEN 'MI' THEN 2
     WHEN 'SI' THEN 3
@@ -88,7 +103,7 @@ if (isset($_POST['generate_team'])) {
     WHEN 'TS' THEN 5
     ELSE 6 -- Jika ada prodi lain yang tidak disebutkan
     END, angkatan, kelas, mbkm, nim";
-$result = $conn->query($query);
+    $result = $conn->query($query);
 
 
     if ($result->num_rows == 0) {
@@ -98,6 +113,13 @@ $result = $conn->query($query);
 
     $mahasiswa = $result->fetch_all(MYSQLI_ASSOC);
 
+    // Menghitung jumlah mahasiswa tiap prodi
+    $count_query = "SELECT prodi, COUNT(*) AS total FROM mahasiswa GROUP BY prodi";
+    $count_result = $conn->query($count_query);
+
+    while ($row = $count_result->fetch_assoc()) {
+        $students_per_prodi[$row['prodi']] = $row['total'];
+    }
     // Kelompokkan mahasiswa berdasarkan prodi
     $grouped_by_prodi = [];
     foreach ($mahasiswa as $mhs) {
@@ -110,13 +132,20 @@ $result = $conn->query($query);
 
     $remaining_students = []; // Array untuk menyimpan mahasiswa sisa
 
-    foreach ($grouped_by_prodi as $prodi => $the_prodi) {
-        $total_students = count($the_prodi);
+    foreach ($grouped_by_prodi as $prodi => $total_students) {
+        // $total_students = count($the_prodi);
+        // Filter mahasiswa berdasarkan prodi
+        $filtered_students = array_filter($mahasiswa, function ($mhs) use ($prodi) {
+            return $mhs['prodi'] === $prodi;
+        });
+
+        $filtered_students = array_values($filtered_students); // Reset index array
+
 
         // Jika jumlah mahasiswa <= 5, buat satu kelompok
         if ($total_students <= 5) {
             $conn->query("INSERT INTO kelompok (no_kelompok) VALUES ($kelompok_counter)");
-            foreach ($the_prodi as $mhs) {
+            foreach ($filtered_students as $mhs) {
                 $nim = $mhs['nim'];
 
                 // Cek apakah mahasiswa sudah tergabung dalam kelompok lain
@@ -132,7 +161,7 @@ $result = $conn->query($query);
 
         // Jika jumlah mahasiswa adalah 6 atau 7, bagi menjadi 2 kelompok (3-3 atau 3-4)
         if ($total_students == 6 || $total_students == 7) {
-            $chunks = array_chunk($the_prodi, ceil($total_students / 2));
+            $chunks = array_chunk($filtered_students, ceil($total_students / 2));
             foreach ($chunks as $chunk) {
                 $conn->query("INSERT INTO kelompok (no_kelompok) VALUES ($kelompok_counter)");
                 foreach ($chunk as $mhs) {
@@ -265,25 +294,25 @@ $result = $conn->query($query);
                     } else {
                         // Cari kelompok yang memenuhi Prioritas 1 (Prodi, Angkatan, Kelas, MBKM)
                         $query = "SELECT k.no_kelompok 
-                            FROM kpconnection kc
-                            JOIN mahasiswa m ON kc.nim = m.nim
-                            JOIN kelompok k ON kc.no_kelompok = k.no_kelompok
-                            WHERE m.prodi = '$prodi' AND m.angkatan = $angkatan
-                            AND m.kelas = '$kelas' AND m.mbkm = $mbkm
-                            GROUP BY k.no_kelompok
-                            HAVING COUNT(*) < 5 LIMIT 1";
+                FROM kpconnection kc
+                JOIN mahasiswa m ON kc.nim = m.nim
+                JOIN kelompok k ON kc.no_kelompok = k.no_kelompok
+                WHERE m.prodi = '$prodi' AND m.angkatan = $angkatan
+                AND m.kelas = '$kelas' AND m.mbkm = $mbkm
+                GROUP BY k.no_kelompok
+                HAVING COUNT(*) < 5 LIMIT 1";
                         $result = $conn->query($query);
                         
                         // Jika tidak ditemukan kelompok Prioritas 1, cari Prioritas 2
                         if ($result->num_rows == 0) {
                             $query = "SELECT k.no_kelompok 
-                                FROM kpconnection kc
-                                JOIN mahasiswa m ON kc.nim = m.nim
-                                JOIN kelompok k ON kc.no_kelompok = k.no_kelompok
-                                WHERE m.prodi = '$prodi' AND m.angkatan = $angkatan 
-                                AND m.mbkm = $mbkm
-                                GROUP BY k.no_kelompok
-                                HAVING COUNT(*) < 5 LIMIT 1";
+                    FROM kpconnection kc
+                    JOIN mahasiswa m ON kc.nim = m.nim
+                    JOIN kelompok k ON kc.no_kelompok = k.no_kelompok
+                    WHERE m.prodi = '$prodi' AND m.angkatan = $angkatan
+                    AND m.mbkm = $mbkm
+                    GROUP BY k.no_kelompok
+                    HAVING COUNT(*) < 5 LIMIT 1";
                             $result = $conn->query($query);
                         }
                     }
@@ -299,44 +328,64 @@ $result = $conn->query($query);
         }
     }
     // Bagikan dosen ke kelompok
-    $kelompok = $conn->query("SELECT no_kelompok FROM kelompok")->fetch_all(MYSQLI_ASSOC);
-    $dosen = $conn->query("SELECT nik FROM dosen")->fetch_all(MYSQLI_ASSOC);
+$kelompok = $conn->query("SELECT no_kelompok FROM kelompok")->fetch_all(MYSQLI_ASSOC);
+$dosen = $conn->query("SELECT nik FROM dosen")->fetch_all(MYSQLI_ASSOC);
 
-    // Jumlah kelompok dan dosen
-    $total_kelompok = count($kelompok);
-    $total_dosen = count($dosen);
+// Kelompok yang sudah memiliki dosen
+$existing_allocations = $conn->query("SELECT DISTINCT no_kelompok, nik FROM kpconnection WHERE nik IS NOT NULL")
+    ->fetch_all(MYSQLI_ASSOC);
 
-    // Hitung jumlah kelompok per dosen
-    $base_count = intdiv($total_kelompok, $total_dosen);
-    $remainder = $total_kelompok % $total_dosen;
-
-    // Distribusi kelompok per dosen
-    $dosen_kelompok = array_fill(0, $total_dosen, $base_count);
-    $sisa_indices = range(0, $total_dosen - 1);
-    shuffle($sisa_indices);
-
-    for ($i = 0; $i < $remainder; $i++) {
-        $dosen_kelompok[$sisa_indices[$i]]++;
+// Kelompok tanpa dosen
+$kelompok_tanpa_dosen = array_filter($kelompok, function ($grp) use ($existing_allocations) {
+    foreach ($existing_allocations as $allocation) {
+        if ($grp['no_kelompok'] == $allocation['no_kelompok']) {
+            return false;
+        }
     }
+    return true;
+});
 
-    shuffle($kelompok); // Acak kelompok sebelum dibagikan
+$total_kelompok_baru = count($kelompok_tanpa_dosen);
+$total_dosen = count($dosen);
 
-    $index = 0;
-    foreach ($kelompok as $grp) {
+if ($total_kelompok_baru > 0) {
+    // Hitung batas maksimum kelompok per dosen
+    $max_kelompok_per_dosen = ceil(count($kelompok) / $total_dosen);
+
+    // Hitung jumlah kelompok yang sudah dipegang setiap dosen
+    $dosen_kelompok_count = [];
+foreach ($dosen as $d) {
+    $nik = $d['nik'];
+    $result = $conn->query("
+        SELECT COUNT(DISTINCT no_kelompok) as total 
+        FROM kpconnection 
+        WHERE nik = '$nik'
+    ");
+    $dosen_kelompok_count[$nik] = $result->fetch_assoc()['total'];
+}
+
+    // Distribusi dosen untuk kelompok baru
+    shuffle($kelompok_tanpa_dosen);
+    foreach ($kelompok_tanpa_dosen as $grp) {
         $id_kelompok = $grp['no_kelompok'];
-        for ($i = 0; $i < $total_dosen; $i++) {
-            if ($dosen_kelompok[$i] > 0) {
-                $id_dosen = $dosen[$i]['nik'];
-                $dosen_kelompok[$i]--;
+
+        // Cari dosen yang masih bisa menerima kelompok
+        foreach ($dosen as $d) {
+            $id_dosen = $d['nik'];
+
+            if ($dosen_kelompok_count[$id_dosen] < $max_kelompok_per_dosen) {
+                // Tambahkan kelompok ke dosen ini
+                $conn->query("UPDATE kpconnection SET nik = '$id_dosen' WHERE no_kelompok = $id_kelompok");
+                $dosen_kelompok_count[$id_dosen]++;
                 break;
             }
         }
-        $conn->query("UPDATE kpconnection SET nik = $id_dosen WHERE no_kelompok = $id_kelompok");
     }
+}
 
-    $_SESSION['success'] = "Kelompok dan dosen berhasil dibagi secara acak!";
-    header("Location: kelompok.php");
-    exit();
+$_SESSION['success'] = "Kelompok baru berhasil dibagi ke dosen tanpa mengubah alokasi lama!";
+header("Location: kelompok.php");
+exit();
 }
 ?>
 
@@ -414,91 +463,111 @@ $result = $conn->query($query);
                     </nav>
                 </div>
             </aside>
-        <main class="app-main">
+            <main class="app-main">
             <div class="container-fluid px-5 py-3">
                 <h1>Data Kelompok Kerja Praktek</h1>
-                <p>Data Mahasiswa Kerja Praktek Per Kelompok</p>
+                <p>Data Mah asiswa Kerja Praktek Per Kelompok</p>
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <div class="row">
+                            <form method="POST">
+                                <input type="submit" class="btn btn-primary" name="generate_team" value="GENERATE">
+                            </form>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="row">
+                            <form method="GET" action="">
+                                <div class="input-group">
+                                    <input type="text" name="search" class="form-control" placeholder="Cari berdasarkan nomor kelompok..." value="<?php echo htmlspecialchars ($_GET['search'] ?? ''); ?>">
+                                    <button type="submit" class="btn btn-primary">Cari</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
                 <div class="row">
-                    <div class="col d-flex justify-content-end">
                     <p class="me-3">
-                            Mahasiswa yang tergabung ke kelompok : 
-                            <?php
+                        Mahasiswa yang tergabung ke kelompok: 
+                        <?php
                         $mahasiswa_counter = $conn->query("SELECT COUNT(*) as total FROM kpconnection")->fetch_assoc()['total'];
                         echo $mahasiswa_counter . "/";
-
                         $mahasiswa_counter2 = $conn->query("SELECT COUNT(*) as total FROM mahasiswa")->fetch_assoc()['total'];
                         echo $mahasiswa_counter2;
-                    ?>
-                        </p>
-                    
-                <form method="POST">
-                    <input type="submit" class="btn btn-primary" name="generate_team" value="BUAT KELOMPOK BARU">
-                </form>
-                    </div>        
+                        ?>
+                    </p>
                 </div>
-
                 <table class="table table-bordered mt-3">
                     <thead>
                         <tr>
                             <th>Kelompok</th>
                             <th>NIM</th>
                             <th>Nama Mahasiswa</th>
-                            <th>JK</th>
+                            <th>Telp</th>
                             <th>Kelas</th>
-                            <th>MBKM</th>
                             <th>Dosen</th>
                         </tr>
                     </thead>
                     <tbody>
-                    <?php
-$query = "SELECT k.no_kelompok,m.nim, m.nama, m.jk, m.prodi, m.angkatan, m.kelas, m.mbkm, d.nama_dosen, 
-                 COUNT(*) OVER (PARTITION BY k.no_kelompok) AS jumlah_mahasiswa
-          FROM kpconnection kc
-          JOIN mahasiswa m ON kc.nim = m.nim
-          JOIN kelompok k ON kc.no_kelompok = k.no_kelompok
-          JOIN dosen d ON kc.nik = d.nik
-          ORDER BY k.no_kelompok, m.nama";
-
-$result = $conn->query($query);
-$last_group = null; // Menyimpan kelompok terakhir yang sudah diproses
-$group_count = 0; // Menyimpan jumlah mahasiswa dalam satu kelompok
-
-while ($row = $result->fetch_assoc()) {
-    if ($last_group !== $row['no_kelompok']) {
-        // Jika kelompok baru, tampilkan no_kelompok dan dosen dengan rowspan
-        if ($last_group !== null) {
-            // Jika ada kelompok sebelumnya, tampilkan sisa mahasiswa
-            echo "</tr>"; 
-        }
-        
-        // Set last group dan hitung jumlah mahasiswa
-        $last_group = $row['no_kelompok'];
-        $group_count = $row['jumlah_mahasiswa'];
-
-        // Tampilkan no_kelompok dengan rowspan
-        echo "<tr>";
-        echo "<td rowspan=\"$group_count\">Kelompok {$row['no_kelompok']}</td>";
-        echo "<td>{$row['nim']}</td>";
-        echo "<td>{$row['nama']}</td>";
-        echo "<td>{$row['jk']}</td>";
-        echo "<td>{$row['prodi']} ". $row['angkatan'] . " " . $row['kelas'] . "</td>";
-        echo "<td>{$row['mbkm']}</td>";
-        echo "<td rowspan=\"$group_count\">{$row['nama_dosen']}</td>";
-    } else {
-        // Jika masih dalam kelompok yang sama, hanya tampilkan mahasiswa berikutnya
-        echo "<tr>";
-        echo "<td>{$row['nim']}</td>";
-        echo "<td>{$row['nama']}</td>";
-        echo "<td>{$row['jk']}</td>";
-        echo "<td>{$row['prodi']} ". $row['angkatan'] . " " . $row['kelas'] . "</td>";
-        echo "<td>{$row['mbkm']}</td>";
-    }
-    echo "</tr>";
-}
-?>
-
+                    <?php if (empty($kelompok_data)) { ?>
+                        <tr>
+                            <td colspan="6" class="text-center">Tidak ada data ditemukan.</td>
+                        </tr>
+                    <?php } else { ?>
+                        <?php foreach ($kelompok_data as $no_kelompok => $members): ?>
+            <tr>
+                <td rowspan="<?= count($members) ?>">Kelompok <?= $no_kelompok ?></td>
+                <?php $first = true; ?>
+                <?php foreach ($members as $member): ?>
+                    <?php if (!$first) echo '<tr>'; ?>
+                    <td><?= $member['nim'] ?></td>
+                    <td><?= $member['nama_mahasiswa'] ?></td>
+                    <td><?= $member['telp'] ?></td>
+                    <td><?= $member['prodi']."-".$member['angkatan']."-".$member['kelas'] ?></td>
+                    <?php if ($first): ?>
+                        <td rowspan="<?= count($members) ?>"><?= $members[0]['nama_dosen'] ?></td>
+                    <?php endif; ?>
+                    <?php if (!$first) echo '</tr>'; ?>
+                    <?php $first = false; ?>
+                <?php endforeach; ?>
+            </tr>
+        <?php endforeach; }?>
                     </tbody>
                 </table>
+
+                <!-- Pagination -->
+                <!-- Navigasi Pagination -->
+<ul class="pagination pagination-sm m-0 float-end">
+    <li class="page-item <?php if ($page <= 1) echo 'disabled'; ?>">
+        <a class="page-link" href="?search=<?= urlencode($search_keyword); ?>&page=<?= $page - 1; ?>">«</a>
+    </li>
+    <?php
+    $range_start = max(1, $page - 2);
+    $range_end = min($total_pages, $page + 2);
+
+    if ($range_start > 1) {
+        echo '<li class="page-item"><a class="page-link" href="?search=' . urlencode($search_keyword) . '&page=1">1</a></li>';
+        if ($range_start > 2) {
+            echo '<li class="page-item disabled"><a class="page-link">...</a></li>';
+        }
+    }
+
+    for ($i = $range_start; $i <= $range_end; $i++) {
+        echo '<li class="page-item ' . ($page == $i ? 'active' : '') . '">';
+        echo '<a class="page-link" href="?search=' . urlencode($search_keyword) . '&page=' . $i . '">' . $i . '</a></li>';
+    }
+
+    if ($range_end < $total_pages) {
+        if ($range_end < $total_pages - 1) {
+            echo '<li class="page-item disabled"><a class="page-link">...</a></li>';
+        }
+        echo '<li class="page-item"><a class="page-link" href="?search=' . urlencode($search_keyword) . '&page=' . $total_pages . '">' . $total_pages . '</a></li>';
+    }
+    ?>
+    <li class="page-item <?php if ($page >= $total_pages) echo 'disabled'; ?>">
+        <a class="page-link" href="?search=<?= urlencode($search_keyword); ?>&page=<?= $page + 1; ?>">»</a>
+    </li>
+</ul>
             </div>
         </main>
         <footer class="app-footer">
