@@ -282,36 +282,36 @@ if (isset($_POST['generate_team'])) {
                 if ($check_result->num_rows == 0) { // Jika mahasiswa belum terdaftar
                     if ($prodi == 'SI' && $angkatan == 2021 && $kelas == 06) {
                         // Cari kelompok yang memenuhi Prioritas 1 (Prodi, Angkatan, Kelas, MBKM)
-                        $query = "SELECT k.no_kelompok 
+                        $query = "SELECT k.no_kelompok, kc.nik 
                             FROM kpconnection kc
                             JOIN mahasiswa m ON kc.nim = m.nim
                             JOIN kelompok k ON kc.no_kelompok = k.no_kelompok
                             WHERE m.prodi = '$prodi' AND m.angkatan = $angkatan
                             AND m.kelas = '06'
-                            GROUP BY k.no_kelompok
+                            GROUP BY k.no_kelompok, kc.nik
                             HAVING COUNT(*) < 5 LIMIT 1";
                         $result = $conn->query($query);
                     } else {
                         // Cari kelompok yang memenuhi Prioritas 1 (Prodi, Angkatan, Kelas, MBKM)
-                        $query = "SELECT k.no_kelompok 
+                        $query = "SELECT k.no_kelompok, kc.nik 
                 FROM kpconnection kc
                 JOIN mahasiswa m ON kc.nim = m.nim
                 JOIN kelompok k ON kc.no_kelompok = k.no_kelompok
                 WHERE m.prodi = '$prodi' AND m.angkatan = $angkatan
                 AND m.kelas = '$kelas' AND m.mbkm = $mbkm
-                GROUP BY k.no_kelompok
+                GROUP BY k.no_kelompok, kc.nik
                 HAVING COUNT(*) < 5 LIMIT 1";
                         $result = $conn->query($query);
                         
                         // Jika tidak ditemukan kelompok Prioritas 1, cari Prioritas 2
                         if ($result->num_rows == 0) {
-                            $query = "SELECT k.no_kelompok 
+                            $query = "SELECT k.no_kelompok, kc.nik 
                     FROM kpconnection kc
                     JOIN mahasiswa m ON kc.nim = m.nim
                     JOIN kelompok k ON kc.no_kelompok = k.no_kelompok
                     WHERE m.prodi = '$prodi' AND m.angkatan = $angkatan
                     AND m.mbkm = $mbkm
-                    GROUP BY k.no_kelompok
+                    GROUP BY k.no_kelompok, kc.nik
                     HAVING COUNT(*) < 5 LIMIT 1";
                             $result = $conn->query($query);
                         }
@@ -321,7 +321,8 @@ if (isset($_POST['generate_team'])) {
                         // Tambahkan ke kelompok yang sudah ada
                         $row = $result->fetch_assoc();
                         $no_kelompok = $row['no_kelompok'];
-                        $conn->query("INSERT INTO kpconnection (nim, no_kelompok) VALUES ('$nim', $no_kelompok)");
+                        $nik_dosen = $row['nik'];
+                        $conn->query("INSERT INTO kpconnection (nim, no_kelompok, nik) VALUES ('$nim', $no_kelompok, '$nik_dosen')");
                     }
                 }
             }
@@ -382,6 +383,15 @@ foreach ($dosen as $d) {
         }
     }
 }
+
+// Hapus kelompok kosong (tidak memiliki anggota)
+$conn->query("
+    DELETE FROM kelompok 
+    WHERE no_kelompok NOT IN (
+        SELECT DISTINCT no_kelompok 
+        FROM kpconnection
+    )
+");
 
 $_SESSION['success'] = "Kelompok baru berhasil dibagi ke dosen tanpa mengubah alokasi lama!";
 header("Location: kelompok.php");

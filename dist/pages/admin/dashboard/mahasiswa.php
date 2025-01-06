@@ -150,6 +150,9 @@ $totalPages = ceil($totalItems / $itemsPerPage);
                                 <p>Data Dosen</p>
                             </a>
                         </li>
+                        <li class="nav-item"> <a href="mitra.php" class="nav-link"> <i class="nav-icon bi bi-building-fill"></i>
+                                    <p>Data Mitra</p>
+                                </a> </li>
                         <li class="nav-item">
                             <a href="../../logout.php" class="nav-link">
                                 <i class="nav-icon bi bi-box-arrow-left"></i>

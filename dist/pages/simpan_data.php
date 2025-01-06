@@ -17,6 +17,23 @@ $kelas = $_POST['kelas'];
 $keikutsertaan_mbkm = $_POST['mbkm'];
 $ukuran_jaket = $_POST['jaket'];
 
+// Validasi email: harus berakhiran @uniku.ac.id
+if (substr($email, -12) !== '@uniku.ac.id') {
+    $_SESSION['status'] = 'danger';
+    $_SESSION['message'] = 'Email harus berakhiran @uniku.ac.id';
+    header("Location: pendaftaran.php"); // Kembali ke halaman pendaftaran
+    exit();
+}
+
+// Validasi NIM: NIM harus sesuai dengan bagian email sebelum @
+$email_nim_part = explode('@', $email)[0];
+if ($nim !== $email_nim_part) {
+    $_SESSION['status'] = 'danger';
+    $_SESSION['message'] = 'NIM harus sesuai dengan bagian sebelum @ pada email.';
+    header("Location: pendaftaran.php"); // Kembali ke halaman pendaftaran
+    exit();
+}
+
 // Cek apakah email atau NIM sudah ada
 $cek_query = "SELECT * FROM mahasiswa WHERE email='$email' OR nim='$nim'";
 $result = $conn->query($cek_query);
@@ -27,6 +44,7 @@ if ($result->num_rows > 0) {
     header("Location: pendaftaran.php"); // Kembali ke halaman pendaftaran
     exit();
 } else {
+    // Jika lolos validasi, simpan data
     $sql = "INSERT INTO mahasiswa (email, password, nim, nama, jk, telp, prodi, angkatan, kelas, mbkm, jaket, status) 
             VALUES ('$email', '$password', '$nim', '$nama', '$jenis_kelamin', '$telp', '$program_studi', '$angkatan', '$kelas', '$keikutsertaan_mbkm', '$ukuran_jaket', 'anggota')";
 
@@ -43,3 +61,4 @@ if ($result->num_rows > 0) {
 
 $conn->close();
 exit;
+?>
